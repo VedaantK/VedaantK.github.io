@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VEDAANT.K — Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Scanline overlay -->
+  <div class="scanlines"></div>
+
+  <!-- ── NAVIGATION ── -->
+  <nav id="navbar">
+    <div class="nav-logo">VK<span class="cursor-blink">_</span></div>
+    <ul class="nav-links">
+      <li><a href="#about"   class="nav-btn">[ ABOUT ]</a></li>
+      <li><a href="#projects" class="nav-btn">[ PROJECTS ]</a></li>
+      <li><a href="#contact" class="nav-btn">[ CONTACT ]</a></li>
+    </ul>
+    <div class="nav-score">SCORE: <span id="score">000000</span></div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-tag">INSERT COIN</div>
+      <h1 class="hero-title">VEDAANT<br /><span class="accent">KHANNA</span></h1>
+      <p class="hero-sub">SOFTWARE ENGINEER &amp; BUILDER</p>
+      <div class="hero-lives">
+        <span class="life">♥</span><span class="life">♥</span><span class="life">♥</span>
+      </div>
+      <a href="#about" class="btn-primary">PRESS START</a>
+    </div>
+
+    <!-- Breakout bricks decorative grid -->
+    <div class="brick-grid" aria-hidden="true">
+      <div class="brick-row">
+        <div class="brick b-red"></div><div class="brick b-red"></div><div class="brick b-red"></div><div class="brick b-red"></div><div class="brick b-red"></div><div class="brick b-red"></div>
+      </div>
+      <div class="brick-row">
+        <div class="brick b-orange"></div><div class="brick b-orange"></div><div class="brick b-orange"></div><div class="brick b-orange"></div><div class="brick b-orange"></div><div class="brick b-orange"></div>
+      </div>
+      <div class="brick-row">
+        <div class="brick b-yellow"></div><div class="brick b-yellow"></div><div class="brick b-yellow"></div><div class="brick b-yellow"></div><div class="brick b-yellow"></div><div class="brick b-yellow"></div>
+      </div>
+      <div class="brick-row">
+        <div class="brick b-green"></div><div class="brick b-green"></div><div class="brick b-green"></div><div class="brick b-green"></div><div class="brick b-green"></div><div class="brick b-green"></div>
+      </div>
+      <div class="brick-row">
+        <div class="brick b-cyan"></div><div class="brick b-cyan"></div><div class="brick b-cyan"></div><div class="brick b-cyan"></div><div class="brick b-cyan"></div><div class="brick b-cyan"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section id="about">
+    <div class="section-header">
+      <span class="section-num">01 //</span>
+      <h2 class="section-title">ABOUT.EXE</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card pixel-border">
+        <div class="card-label">// PLAYER ONE</div>
+        <div class="about-avatar">
+          <div class="pixel-avatar">
+            <!-- Simple pixel art face using CSS -->
+          </div>
+        </div>
+        <p class="about-text">
+          Hi, I'm Vedaant — a builder who loves crafting clean, fast, and purposeful software.
+          I thrive at the intersection of engineering and product, shipping things people actually use.
+        </p>
+      </div>
+
+      <div class="about-stats pixel-border">
+        <div class="card-label">// STATS</div>
+        <ul class="stat-list">
+          <li>
+            <span class="stat-name">FRONTEND</span>
+            <div class="stat-bar"><div class="stat-fill" style="width:85%"></div></div>
+          </li>
+          <li>
+            <span class="stat-name">BACKEND</span>
+            <div class="stat-bar"><div class="stat-fill" style="width:80%"></div></div>
+          </li>
+          <li>
+            <span class="stat-name">DESIGN</span>
+            <div class="stat-bar"><div class="stat-fill" style="width:70%"></div></div>
+          </li>
+          <li>
+            <span class="stat-name">AI / ML</span>
+            <div class="stat-bar"><div class="stat-fill" style="width:75%"></div></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="about-skills pixel-border">
+        <div class="card-label">// POWER-UPS</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">TypeScript</span>
+          <span class="skill-tag">React</span>
+          <span class="skill-tag">Node.js</span>
+          <span class="skill-tag">Next.js</span>
+          <span class="skill-tag">PostgreSQL</span>
+          <span class="skill-tag">Docker</span>
+          <span class="skill-tag">Git</span>
+          <span class="skill-tag">AWS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROJECTS ── -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-num">02 //</span>
+      <h2 class="section-title">PROJECTS.DAT</h2>
+    </div>
+
+    <div class="projects-grid">
+
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-red"></div><div class="pb b-red"></div><div class="pb b-red"></div>
+          </div>
+          <span class="project-tag">WEB APP</span>
+        </div>
+        <h3 class="project-name">PROJECT ALPHA</h3>
+        <p class="project-desc">
+          A full-stack web application with real-time features, built with React and Node.js.
+          Handles thousands of concurrent users.
+        </p>
+        <div class="project-tech">
+          <span>React</span><span>Node.js</span><span>WebSockets</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="btn-sm">[ DEMO ]</a>
+          <a href="#" class="btn-sm">[ CODE ]</a>
+        </div>
+      </article>
+
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-cyan"></div><div class="pb b-cyan"></div><div class="pb b-cyan"></div>
+          </div>
+          <span class="project-tag">AI / ML</span>
+        </div>
+        <h3 class="project-name">PROJECT BETA</h3>
+        <p class="project-desc">
+          An AI-powered tool that automates repetitive workflows using LLMs and custom pipelines.
+          Cut manual work by 80%.
+        </p>
+        <div class="project-tech">
+          <span>Python</span><span>LangChain</span><span>FastAPI</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="btn-sm">[ DEMO ]</a>
+          <a href="#" class="btn-sm">[ CODE ]</a>
+        </div>
+      </article>
+
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-green"></div><div class="pb b-green"></div><div class="pb b-green"></div>
+          </div>
+          <span class="project-tag">MOBILE</span>
+        </div>
+        <h3 class="project-name">PROJECT GAMMA</h3>
+        <p class="project-desc">
+          A cross-platform mobile app for tracking personal metrics, with beautiful data visualizations
+          and offline-first architecture.
+        </p>
+        <div class="project-tech">
+          <span>React Native</span><span>Expo</span><span>SQLite</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="btn-sm">[ DEMO ]</a>
+          <a href="#" class="btn-sm">[ CODE ]</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact">
+    <div class="section-header">
+      <span class="section-num">03 //</span>
+      <h2 class="section-title">CONTACT.SYS</h2>
+    </div>
+
+    <div class="contact-wrapper">
+      <div class="contact-info pixel-border">
+        <div class="card-label">// CHANNELS</div>
+        <ul class="contact-list">
+          <li>
+            <span class="contact-icon">✉</span>
+            <a href="mailto:vedaant2910@gmail.com">vedaant2910@gmail.com</a>
+          </li>
+          <li>
+            <span class="contact-icon">◈</span>
+            <a href="https://github.com/VedaantK" target="_blank" rel="noopener">github.com/VedaantK</a>
+          </li>
+          <li>
+            <span class="contact-icon">▶</span>
+            <a href="https://linkedin.com/in/vedaantkhanna" target="_blank" rel="noopener">linkedin.com/in/vedaantkhanna</a>
+          </li>
+        </ul>
+      </div>
+
+      <form class="contact-form pixel-border" id="contactForm">
+        <div class="card-label">// SEND MESSAGE</div>
+        <div class="form-group">
+          <label for="name">NAME_</label>
+          <input type="text" id="name" name="name" placeholder="PLAYER ONE" required />
+        </div>
+        <div class="form-group">
+          <label for="email">EMAIL_</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required />
+        </div>
+        <div class="form-group">
+          <label for="message">MESSAGE_</label>
+          <textarea id="message" name="message" rows="5" placeholder="TYPE YOUR MESSAGE HERE..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary">[ SEND ]</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer id="footer">
+    <div class="footer-paddle" aria-hidden="true"></div>
+    <p class="footer-text">© 2026 VEDAANT KHANNA — GAME OVER? NEVER.</p>
+    <p class="footer-sub">BUILT WITH ♥ AND TOO MUCH CAFFEINE</p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
