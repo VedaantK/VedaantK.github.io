@@ -29,21 +29,6 @@ const observer = new IntersectionObserver(
 
 sections.forEach((s) => observer.observe(s));
 
-/* ── CONTACT FORM ── */
-const form = document.getElementById('contactForm');
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const btn = form.querySelector('button[type="submit"]');
-  btn.textContent = '[ TRANSMITTED! ]';
-  btn.style.background = 'var(--green)';
-  incrementScore(500);
-  setTimeout(() => {
-    btn.textContent = '[ SEND ]';
-    btn.style.background = '';
-    form.reset();
-  }, 3000);
-});
-
 /* ── BRICK CLICK EASTER EGG ── */
 document.querySelectorAll('.brick, .pb').forEach((brick) => {
   brick.addEventListener('click', () => {
