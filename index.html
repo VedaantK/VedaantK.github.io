@@ -16,13 +16,15 @@
   <!-- ── NAVIGATION ── -->
   <nav id="navbar">
     <div class="nav-logo">VK<span class="cursor-blink">_</span></div>
-    <ul class="nav-links">
-      <li><a href="#about"     class="nav-btn">[ ABOUT ]</a></li>
-      <li><a href="#projects"  class="nav-btn">[ PROJECTS ]</a></li>
-      <li><a href="#interests" class="nav-btn">[ INTERESTS ]</a></li>
-      <li><a href="#contact"   class="nav-btn">[ CONTACT ]</a></li>
+    <ul class="nav-links" id="navMenu">
+      <li><a href="#about"    class="nav-btn">[ ABOUT ]</a></li>
+      <li><a href="#projects" class="nav-btn">[ PROJECTS ]</a></li>
+      <li><a href="#contact"  class="nav-btn">[ CONTACT ]</a></li>
     </ul>
     <div class="nav-score">SCORE: <span id="score">000000</span></div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <!-- ── HERO ── -->
@@ -76,20 +78,21 @@
             Hi, I'm Vedaant — a builder who loves crafting clean, fast, and purposeful software.
             I thrive at the intersection of engineering and product, shipping things people actually use.
           </p>
-        </div>
 
-        <div class="about-skills pixel-border">
-          <div class="card-label">// POWER-UPS</div>
-          <div class="skill-tags">
-            <span class="skill-tag">Python</span>
-            <span class="skill-tag">TypeScript</span>
-            <span class="skill-tag">React</span>
-            <span class="skill-tag">Node.js</span>
-            <span class="skill-tag">Next.js</span>
-            <span class="skill-tag">PostgreSQL</span>
-            <span class="skill-tag">Docker</span>
-            <span class="skill-tag">Git</span>
-            <span class="skill-tag">AWS</span>
+          <div class="card-label" style="margin-top:1.4rem;">// INTERESTS</div>
+          <div class="about-interests">
+            <div class="about-interest-item">
+              <span class="about-interest-icon">🎾</span>
+              <span class="about-interest-name">TENNIS</span>
+            </div>
+            <div class="about-interest-item">
+              <span class="about-interest-icon">🧗</span>
+              <span class="about-interest-name">ROCK CLIMBING</span>
+            </div>
+            <div class="about-interest-item">
+              <span class="about-interest-icon">✈</span>
+              <span class="about-interest-name">TRAVELING</span>
+            </div>
           </div>
         </div>
       </div>
@@ -172,49 +175,10 @@
     </div>
   </section>
 
-  <!-- ── INTERESTS ── -->
-  <section id="interests">
-    <div class="section-header">
-      <span class="section-num">03 //</span>
-      <h2 class="section-title">INTERESTS.LOG</h2>
-    </div>
-
-    <div class="interests-grid">
-
-      <div class="interest-card pixel-border">
-        <div class="interest-icon">🎾</div>
-        <h3 class="interest-name">TENNIS</h3>
-        <p class="interest-desc">
-          On the court whenever I can be. Love the mental game as much as the physical — reading
-          opponents, adjusting strategy mid-match.
-        </p>
-      </div>
-
-      <div class="interest-card pixel-border">
-        <div class="interest-icon">🧗</div>
-        <h3 class="interest-name">ROCK CLIMBING</h3>
-        <p class="interest-desc">
-          Bouldering and top-rope. Every problem is a puzzle. Favourite thing about climbing
-          is how quickly it quiets everything else in your head.
-        </p>
-      </div>
-
-      <div class="interest-card pixel-border">
-        <div class="interest-icon">✈</div>
-        <h3 class="interest-name">TRAVELING</h3>
-        <p class="interest-desc">
-          Always planning the next trip. Exploring new cities, cultures, and food is how I
-          reset and find fresh perspective.
-        </p>
-      </div>
-
-    </div>
-  </section>
-
   <!-- ── CONTACT ── -->
   <section id="contact">
     <div class="section-header">
-      <span class="section-num">04 //</span>
+      <span class="section-num">03 //</span>
       <h2 class="section-title">CONTACT.SYS</h2>
     </div>
 
@@ -243,7 +207,6 @@
   <footer id="footer">
     <div class="footer-paddle" aria-hidden="true"></div>
     <p class="footer-text">© 2026 VEDAANT KULKARNI — GAME OVER? NEVER.</p>
-    <p class="footer-sub">BUILT WITH ♥ AND TOO MUCH CAFFEINE</p>
   </footer>
 
   <script src="main.js"></script>

@@ -29,6 +29,22 @@ const observer = new IntersectionObserver(
 
 sections.forEach((s) => observer.observe(s));
 
+/* ── HAMBURGER MENU ── */
+const hamburger = document.getElementById('hamburger');
+const navMenu   = document.getElementById('navMenu');
+
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navMenu.classList.toggle('open');
+});
+
+navLinks.forEach((link) => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    navMenu.classList.remove('open');
+  });
+});
+
 /* ── BRICK CLICK EASTER EGG ── */
 document.querySelectorAll('.brick, .pb').forEach((brick) => {
   brick.addEventListener('click', () => {
