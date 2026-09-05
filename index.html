@@ -56,13 +56,17 @@
   <section id="hero">
     <div class="hero-content">
       <div class="hero-tag">INSERT COIN</div>
-      <h1 class="hero-title">VEDAANT<br /><span class="accent">KULKARNI</span></h1>
+      <!-- Each letter is a span so the breakout ball can change its colour on hit -->
+      <h1 class="hero-title"><span class="hero-letter">V</span><span class="hero-letter">E</span><span class="hero-letter">D</span><span class="hero-letter">A</span><span class="hero-letter">A</span><span class="hero-letter">N</span><span class="hero-letter">T</span><br /><span class="hero-letter accent">K</span><span class="hero-letter accent">U</span><span class="hero-letter accent">L</span><span class="hero-letter accent">K</span><span class="hero-letter accent">A</span><span class="hero-letter accent">R</span><span class="hero-letter accent">N</span><span class="hero-letter accent">I</span></h1>
       <p class="hero-sub">SOFTWARE ENGINEER &amp; BUILDER</p>
       <div class="hero-lives">
         <span class="life">♥</span><span class="life">♥</span><span class="life">♥</span>
       </div>
       <a href="#about" class="btn-primary">PRESS START</a>
     </div>
+
+    <!-- Canvas for the bouncing block-breaker ball -->
+    <canvas id="breakout-canvas" aria-hidden="true"></canvas>
 
     <!-- Breakout bricks decorative grid -->
     <div class="brick-grid" aria-hidden="true">
@@ -245,9 +249,10 @@
   <!-- ── FOOTER ── -->
   <footer id="footer">
     <div class="footer-paddle" aria-hidden="true"></div>
-    <p class="footer-text">© 2026 VEDAANT KULKARNI — GAME OVER? NEVER.</p>
+    <p class="footer-text">© 2026 VEDAANT KULKARNI</p>
   </footer>
 
   <script src="main.js"></script>
+  <script src="breakout.js"></script>
 </body>
 </html>

@@ -252,6 +252,20 @@ section {
   text-shadow: 0 0 10px var(--accent);
 }
 
+/* ── BREAKOUT CANVAS ── */
+#breakout-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* let clicks pass through to elements below */
+  z-index: 3;
+}
+
+/* Individual hero title letters — transition lets colour changes animate smoothly */
+.hero-letter {
+  display: inline;
+  transition: color 0.5s, text-shadow 0.5s;
+}
+
 /* ── BRICK GRID (hero decoration) ── */
 .brick-grid {
   display: flex;
