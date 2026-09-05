@@ -246,6 +246,21 @@ section {
   margin-bottom: 2.5rem;
 }
 
+.scroll-hint {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  color: var(--fg);
+  opacity: 0.4;
+  letter-spacing: 0.2em;
+  margin-top: 2rem;
+  animation: scroll-bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0);    opacity: 0.4; }
+  50%       { transform: translateY(6px); opacity: 0.7; }
+}
+
 .life {
   font-size: 1.4rem;
   color: var(--accent);
@@ -569,6 +584,15 @@ section {
 .contact-wrapper {
   max-width: 600px;
   margin: 0 auto;
+}
+
+.contact-intro {
+  max-width: 600px;
+  margin: 0 auto 1.8rem;
+  font-size: 1.1rem;
+  color: var(--fg);
+  opacity: 0.7;
+  text-align: center;
 }
 
 .contact-info {
