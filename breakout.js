@@ -138,14 +138,26 @@
       }
     });
 
-    // Letter collision — flash a neon colour, no bounce
+    // Letter collision — flash a neon colour, subtle glow, no bounce
     letters.forEach(letter => {
       if (hits(letter.getBoundingClientRect(), cr)) {
         const c = NEON[Math.floor(Math.random() * NEON.length)];
         letter.style.color      = c;
-        letter.style.textShadow = `0 0 16px ${c}, 2px 2px 0 rgba(0,0,0,0.4)`;
+        letter.style.textShadow = `0 0 6px ${c}`;
       }
     });
+
+    // Navbar collision — ball bounces off the bottom edge of the fixed nav
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+      const nr = navbar.getBoundingClientRect();
+      // The nav bottom edge in canvas coordinates
+      const navBottom = nr.bottom - cr.top;
+      if (ball.y - ball.r <= navBottom && ball.vy < 0) {
+        ball.y = navBottom + ball.r;
+        ball.vy = Math.abs(ball.vy);
+      }
+    }
 
     draw();
     requestAnimationFrame(tick);
