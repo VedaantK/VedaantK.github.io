@@ -1,10 +1,35 @@
+<!--
+  ============================================================
+  Vedaant Kulkarni — Portfolio Website
+  Hosted on GitHub Pages: https://vedaantk.github.io
+  ============================================================
+
+  AI USAGE:
+  This website was built with the assistance of Claude (Anthropic).
+  AI helped generate the initial HTML structure, CSS layout and
+  retro 80s design theme, and JavaScript interactive features.
+  I reviewed, adapted, and customised all AI output — adjusting
+  content, section layout, colour choices, photo handling, and
+  mobile responsiveness to match my own vision.
+
+  SOURCES & CREDITS:
+  - Fonts: "Press Start 2P" and "VT323" via Google Fonts
+    (https://fonts.google.com) — free for personal/commercial use
+    under the Open Font License.
+  - Design concept (retro arcade / Breakout aesthetic): original,
+    developed in collaboration with Claude AI.
+  - All written content and personal photo: Vedaant Kulkarni.
+  ============================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vedaant Kulkarni — Software engineer and builder. Portfolio of projects, skills, and contact info." />
   <title>VEDAANT.K — Portfolio</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- AI-assisted: Google Fonts loaded here for the retro pixel aesthetic -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet" />
 </head>
@@ -79,6 +104,17 @@
             I thrive at the intersection of engineering and product, shipping things people actually use.
           </p>
 
+          <!-- Skills section — required by course spec -->
+          <div class="card-label" style="margin-top:1.4rem;">// SKILLS</div>
+          <div class="skill-tags">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">React</span>
+            <span class="skill-tag">SQL</span>
+            <span class="skill-tag">HTML / CSS</span>
+            <span class="skill-tag">Git</span>
+          </div>
+
           <div class="card-label" style="margin-top:1.4rem;">// INTERESTS</div>
           <div class="about-interests">
             <div class="about-interest-item">
@@ -109,66 +145,69 @@
 
     <div class="projects-grid">
 
-      <article class="project-card pixel-border">
-        <div class="project-top">
-          <div class="project-bricks" aria-hidden="true">
-            <div class="pb b-red"></div><div class="pb b-red"></div><div class="pb b-red"></div>
-          </div>
-          <span class="project-tag">WEB APP</span>
-        </div>
-        <h3 class="project-name">PROJECT ALPHA</h3>
-        <p class="project-desc">
-          A full-stack web application with real-time features, built with React and Node.js.
-          Handles thousands of concurrent users.
-        </p>
-        <div class="project-tech">
-          <span>React</span><span>Node.js</span><span>WebSockets</span>
-        </div>
-        <div class="project-links">
-          <a href="#" class="btn-sm">[ DEMO ]</a>
-          <a href="#" class="btn-sm">[ CODE ]</a>
-        </div>
-      </article>
-
+      <!-- This portfolio is itself listed as a project, as required -->
       <article class="project-card pixel-border">
         <div class="project-top">
           <div class="project-bricks" aria-hidden="true">
             <div class="pb b-cyan"></div><div class="pb b-cyan"></div><div class="pb b-cyan"></div>
           </div>
-          <span class="project-tag">AI / ML</span>
+          <span class="project-tag">PORTFOLIO</span>
         </div>
-        <h3 class="project-name">PROJECT BETA</h3>
+        <h3 class="project-name">THIS PORTFOLIO</h3>
         <p class="project-desc">
-          An AI-powered tool that automates repetitive workflows using LLMs and custom pipelines.
-          Cut manual work by 80%.
+          The site you're looking at. Retro 80s arcade aesthetic built with vanilla HTML, CSS, and
+          JavaScript. Responsive, interactive, and deployed on GitHub Pages.
         </p>
         <div class="project-tech">
-          <span>Python</span><span>LangChain</span><span>FastAPI</span>
+          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>GitHub Pages</span>
         </div>
         <div class="project-links">
-          <a href="#" class="btn-sm">[ DEMO ]</a>
-          <a href="#" class="btn-sm">[ CODE ]</a>
+          <a href="https://vedaantk.github.io" class="btn-sm" target="_blank" rel="noopener">[ LIVE ]</a>
+          <a href="https://github.com/VedaantK/VedaantK.github.io" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
         </div>
       </article>
 
-      <article class="project-card pixel-border">
+      <!-- Placeholder — will be filled in as course projects are completed -->
+      <article class="project-card pixel-border project-placeholder">
         <div class="project-top">
           <div class="project-bricks" aria-hidden="true">
-            <div class="pb b-green"></div><div class="pb b-green"></div><div class="pb b-green"></div>
+            <div class="pb b-yellow"></div><div class="pb b-yellow"></div><div class="pb b-yellow"></div>
           </div>
-          <span class="project-tag">MOBILE</span>
+          <span class="project-tag">COMING SOON</span>
         </div>
-        <h3 class="project-name">PROJECT GAMMA</h3>
+        <h3 class="project-name">PROJECT 02</h3>
         <p class="project-desc">
-          A cross-platform mobile app for tracking personal metrics, with beautiful data visualizations
-          and offline-first architecture.
+          Next project coming soon. Check back as the semester progresses —
+          this slot will be filled with real work.
         </p>
         <div class="project-tech">
-          <span>React Native</span><span>Expo</span><span>SQLite</span>
+          <span>TBD</span>
         </div>
         <div class="project-links">
-          <a href="#" class="btn-sm">[ DEMO ]</a>
-          <a href="#" class="btn-sm">[ CODE ]</a>
+          <a href="#" class="btn-sm btn-disabled">[ DEMO ]</a>
+          <a href="#" class="btn-sm btn-disabled">[ CODE ]</a>
+        </div>
+      </article>
+
+      <!-- Placeholder — will be filled in as course projects are completed -->
+      <article class="project-card pixel-border project-placeholder">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-orange"></div><div class="pb b-orange"></div><div class="pb b-orange"></div>
+          </div>
+          <span class="project-tag">COMING SOON</span>
+        </div>
+        <h3 class="project-name">PROJECT 03</h3>
+        <p class="project-desc">
+          Another project in the pipeline. This portfolio will grow throughout
+          the course — stay tuned.
+        </p>
+        <div class="project-tech">
+          <span>TBD</span>
+        </div>
+        <div class="project-links">
+          <a href="#" class="btn-sm btn-disabled">[ DEMO ]</a>
+          <a href="#" class="btn-sm btn-disabled">[ CODE ]</a>
         </div>
       </article>
 
