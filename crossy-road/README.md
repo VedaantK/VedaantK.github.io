@@ -1,11 +1,8 @@
 # Road Racer
 
-## What is it?
+## What is the game?
 
-Road Racer is a 3D browser game inspired by Crossy Road, built entirely with Three.js and vanilla JavaScript — no game engine, no build step.
-Unlike the original Crossy Road, movement here is physics-based and continuous (WASD / arrow keys, not tap-to-hop), so the car accelerates and decelerates smoothly instead of jumping one square at a time. The world also generates infinitely as you drive forward, with cars and trucks that get faster once your score passes 20.
-
-> **Note:** The two sentences above describe what makes this game distinct. Edit them in your own words before submitting — the course spec asks for this section to not be AI-written.
+I made a crossy road replica, but I wanted to change it a little bit, so I turned it into kind of a street racer style game. The player is not a car instead, which allows for easier manuvering, but the premise of crossing the road, with cars coming at you stays the same. 
 
 ---
 
@@ -28,38 +25,11 @@ Your score equals how many units forward you have traveled from the start. The f
 
 You lose if a car or truck hits your vehicle. A "Game Over" overlay appears showing your final score. Click **Restart** to play again from zero.
 
-**Tips**
-- Grass rows are safe — the car will gently snap to the center of a grass row when you let go of the keys.
-- Road rows have cars (red), truck rows have larger orange vehicles. Trucks are slower but wider.
-- After score 20, all traffic speeds up significantly.
 
 ---
 
 ## AI Usage
 
-**Model used:** Claude (Anthropic) — Claude Sonnet via Claude Code CLI
+I made the whole game inside of Kiro, but then I imported the file into my VS code where my website is stored, and I asked claude to add it to the website and also make any additional touches I wanted to make. 
 
-**Strategy:** I described the gameplay I wanted (Crossy Road feel, 3D, infinite world, physics movement) and asked Claude to help implement it section by section: the Three.js scene setup first, then the row generator, then player physics, then collision detection. I reviewed and tested each piece before moving to the next. I tuned the speed constants, difficulty threshold, and row probability weights myself through playtesting.
-
-**What AI helped with:**
-- Three.js boilerplate (WebGLRenderer, PerspectiveCamera, scene setup)
-- Infinite world generation with forward culling
-- ACCEL/FRICTION physics model for smooth movement
-- Grass snap behaviour (spring toward row center)
-- Camera lerp and snap-on-restart fix
-- Ensuring cars on the same row move at the same speed (no catch-up collisions)
-
-**What I directed / changed myself:**
-- The overall game concept and controls
-- Tuning speed values, difficulty tier threshold, and row type weights through playtesting
-- Deciding to use physics-based movement instead of grid hops
-- Testing edge cases (camera pop on restart, single-grass blips between hazard clusters)
-
----
-
-## Known Issues / Unfinished Work
-
-- No mobile / touch controls — keyboard only
-- No high score persistence (resets on page reload)
-- Decorative trees are just cylinder stumps; no full tree meshes
-- No sound effects or music
+I started by asking for a very barebones version that would finihsh in the 30 minute. It finsihed right around the end of class. Then I changed it by making the player a car and such, and fixed issues, like the player starting in the middle of the level. I tried to fix cars merging through eachother but it is not a 100%. 
