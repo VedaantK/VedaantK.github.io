@@ -1,0 +1,184 @@
+{
+  "generated_at": "2026-09-18T13:55:59",
+  "dataset": {
+    "players": 134,
+    "game_rows": 29372,
+    "seasons": [
+      "2020-21",
+      "2021-22",
+      "2022-23",
+      "2023-24",
+      "2024-25",
+      "2025-26"
+    ],
+    "seasons_configured": 6,
+    "per_season": [
+      {
+        "season": "2020-21",
+        "rows": 2984
+      },
+      {
+        "season": "2021-22",
+        "rows": 3854
+      },
+      {
+        "season": "2022-23",
+        "rows": 4505
+      },
+      {
+        "season": "2023-24",
+        "rows": 5671
+      },
+      {
+        "season": "2024-25",
+        "rows": 5858
+      },
+      {
+        "season": "2025-26",
+        "rows": 6500
+      }
+    ],
+    "first_game": "2020-12-22",
+    "last_game": "2026-04-12",
+    "team_stat_rows": 180,
+    "team_snapshots": 6
+  },
+  "models": {
+    "trained": true,
+    "trained_at": "2026-09-18T13:55:42",
+    "train_rows": 22964,
+    "test_rows": 5742,
+    "n_features": 52,
+    "models": [
+      {
+        "name": "random_forest",
+        "trained": true,
+        "mae": 4.856,
+        "rmse": 6.287,
+        "median_split_accuracy": 0.771
+      },
+      {
+        "name": "linear_regression",
+        "trained": true,
+        "mae": 4.809,
+        "rmse": 6.247,
+        "median_split_accuracy": 0.773
+      },
+      {
+        "name": "xgboost",
+        "trained": true,
+        "mae": 4.862,
+        "rmse": 6.323,
+        "median_split_accuracy": 0.772
+      },
+      {
+        "name": "neural_net",
+        "trained": true,
+        "mae": 4.959,
+        "rmse": 6.506,
+        "median_split_accuracy": 0.761
+      }
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "avg_points_last_20",
+      "importance": 0.7156,
+      "source": "random_forest"
+    },
+    {
+      "feature": "avg_fga_last_5",
+      "importance": 0.0291,
+      "source": "random_forest"
+    },
+    {
+      "feature": "matchup_adjusted_avg",
+      "importance": 0.0219,
+      "source": "random_forest"
+    },
+    {
+      "feature": "avg_points_season",
+      "importance": 0.0202,
+      "source": "random_forest"
+    },
+    {
+      "feature": "avg_points_last_10",
+      "importance": 0.0185,
+      "source": "random_forest"
+    },
+    {
+      "feature": "minutes_trend",
+      "importance": 0.0088,
+      "source": "random_forest"
+    },
+    {
+      "feature": "avg_ft_pct_season",
+      "importance": 0.0077,
+      "source": "random_forest"
+    },
+    {
+      "feature": "min_variance_last10",
+      "importance": 0.0074,
+      "source": "random_forest"
+    },
+    {
+      "feature": "home_away_avg_diff",
+      "importance": 0.007,
+      "source": "random_forest"
+    },
+    {
+      "feature": "fg_pct_trend",
+      "importance": 0.0068,
+      "source": "random_forest"
+    },
+    {
+      "feature": "points_trend",
+      "importance": 0.0067,
+      "source": "random_forest"
+    },
+    {
+      "feature": "avg_plus_minus_last10",
+      "importance": 0.0066,
+      "source": "random_forest"
+    }
+  ],
+  "predictions": {
+    "total": 0,
+    "scored": 0,
+    "correct": 0,
+    "hit_rate": null,
+    "latest_date": null
+  },
+  "sources": [
+    {
+      "name": "NBA Stats",
+      "detail": "player game logs, team ratings",
+      "rows": 29372,
+      "status": "live"
+    },
+    {
+      "name": "The Odds API",
+      "detail": "sportsbook player props",
+      "rows": 0,
+      "status": "awaiting season"
+    },
+    {
+      "name": "Kalshi",
+      "detail": "prediction market",
+      "rows": 0,
+      "status": "awaiting fix"
+    },
+    {
+      "name": "Polymarket",
+      "detail": "prediction market",
+      "rows": 0,
+      "status": "awaiting fix"
+    },
+    {
+      "name": "ESPN",
+      "detail": "injury reports",
+      "rows": 0,
+      "status": "awaiting fix"
+    }
+  ]
+}
