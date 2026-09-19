@@ -248,6 +248,11 @@
   </section>
 
   <section>
+    <div class="sec-head"><h2>GAMES PER SEASON</h2><span class="sec-note">player-game rows collected, by season</span></div>
+    <div class="panel"><div class="bars" id="seasons"></div></div>
+  </section>
+
+  <section>
     <div class="sec-head"><h2>MODEL ACCURACY</h2><span class="sec-note">mean absolute error &mdash; lower is better</span></div>
     <div class="panel"><div class="bars" id="models"></div><div class="axis" id="model-axis"></div></div>
     <div class="note" id="acc-note" hidden></div>
@@ -310,6 +315,26 @@
 
     $("ds-note").textContent = d.first_game
       ? "covering " + d.first_game + " to " + d.last_game : "";
+  }
+
+  function renderSeasons(rows) {
+    var host = $("seasons");
+    if (!rows || !rows.length) {
+      host.innerHTML = '<div class="empty">No season breakdown exported yet.</div>';
+      return;
+    }
+    var max = rows.reduce(function (a, r) { return Math.max(a, r.rows); }, 0) || 1;
+    var latest = rows[rows.length - 1].season;
+    host.innerHTML = rows.map(function (r) {
+      var w = Math.max(2, (r.rows / max) * 100);
+      var isLatest = r.season === latest;
+      return '<div class="row"><div class="row-top">' +
+             '<span class="row-name">' + esc(r.season) +
+               (isLatest ? '<span class="tag">CURRENT</span>' : '') + '</span>' +
+             '<span class="row-val">' + num(r.rows) + ' ROWS</span></div>' +
+             '<div class="track"><span class="fill' + (isLatest ? ' best' : '') +
+             '" style="width:' + w.toFixed(1) + '%"></span></div></div>';
+    }).join("");
   }
 
   function renderModels(m) {
@@ -404,7 +429,7 @@
 
   function fail(msg) {
     $("stamp").textContent = msg;
-    ["tiles", "models", "features", "sources", "preds"].forEach(function (id) {
+    ["tiles", "seasons", "models", "features", "sources", "preds"].forEach(function (id) {
       var el = $(id);
       if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="empty">' + esc(msg) + '</div>';
     });
@@ -419,6 +444,7 @@
       $("stamp").textContent = d.generated_at
         ? "snapshot " + d.generated_at.replace("T", " ") : "snapshot loaded";
       renderDataset(d.dataset);
+      renderSeasons(d.dataset && d.dataset.per_season);
       renderModels(d.models);
       renderFeatures(d.feature_importance);
       renderSources(d.sources);
