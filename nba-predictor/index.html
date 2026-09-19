@@ -236,8 +236,8 @@
 
   <h1>NBA PREDICTOR</h1>
   <p class="lede">
-    An ensemble of Linear Regression, Random Forest and XGBoost that predicts NBA player
-    points, then converts those predictions into over/under probabilities to compare
+    An ensemble of Linear Regression, Random Forest, XGBoost and a small neural net that
+    predicts NBA player points, then converts those predictions into over/under probabilities to compare
     against sportsbook lines. These numbers are a <b>committed snapshot</b>, not a live
     feed &mdash; GitHub Pages is static, so the figures refresh when the export is re-run.
   </p>
@@ -248,12 +248,7 @@
   </section>
 
   <section>
-    <div class="sec-head"><h2>GAMES PER SEASON</h2><span class="sec-note">player-game rows collected, by season</span></div>
-    <div class="panel"><div class="bars" id="seasons"></div></div>
-  </section>
-
-  <section>
-    <div class="sec-head"><h2>MODEL ACCURACY</h2><span class="sec-note">mean absolute error &mdash; lower is better</span></div>
+    <div class="sec-head"><h2>MODEL ACCURACY</h2><span class="sec-note" id="acc-sec-note">mean absolute error &mdash; lower is better</span></div>
     <div class="panel"><div class="bars" id="models"></div><div class="axis" id="model-axis"></div></div>
     <div class="note" id="acc-note" hidden></div>
   </section>
@@ -317,26 +312,6 @@
       ? "covering " + d.first_game + " to " + d.last_game : "";
   }
 
-  function renderSeasons(rows) {
-    var host = $("seasons");
-    if (!rows || !rows.length) {
-      host.innerHTML = '<div class="empty">No season breakdown exported yet.</div>';
-      return;
-    }
-    var max = rows.reduce(function (a, r) { return Math.max(a, r.rows); }, 0) || 1;
-    var latest = rows[rows.length - 1].season;
-    host.innerHTML = rows.map(function (r) {
-      var w = Math.max(2, (r.rows / max) * 100);
-      var isLatest = r.season === latest;
-      return '<div class="row"><div class="row-top">' +
-             '<span class="row-name">' + esc(r.season) +
-               (isLatest ? '<span class="tag">CURRENT</span>' : '') + '</span>' +
-             '<span class="row-val">' + num(r.rows) + ' ROWS</span></div>' +
-             '<div class="track"><span class="fill' + (isLatest ? ' best' : '') +
-             '" style="width:' + w.toFixed(1) + '%"></span></div></div>';
-    }).join("");
-  }
-
   function renderModels(m) {
     var host = $("models");
     if (!m || !m.models || !m.models.length) {
@@ -370,13 +345,22 @@
     $("model-axis").innerHTML =
       "<span>0</span><span>" + max.toFixed(2) + " pts MAE</span>";
 
+    if (m.test_start && m.test_end) {
+      $("acc-sec-note").textContent =
+        "backtested on " + m.test_start + " → " + m.test_end + " — last season, held out";
+    }
+
     if (scored.length > 1) {
       var lo = Math.min.apply(null, scored.map(function (x) { return x.mae; }));
       var hi = Math.max.apply(null, scored.map(function (x) { return x.mae; }));
       var n = $("acc-note");
+      var span = (m.test_start && m.test_end)
+        ? "on " + num(m.test_rows) + " games from " + m.test_start + " to " + m.test_end +
+          " — the entire held-out run of last season"
+        : "on " + num(m.test_rows) + " held-out games";
       n.innerHTML = "<b>Read the flat bars as the finding.</b> All " + scored.length +
         " models land within " + (hi - lo).toFixed(2) + " points of each other &mdash; " +
-        "on " + num(m.test_rows) + " held-out games, none of them separates from the rest. " +
+        span + ", none of them separates from the rest. " +
         "Trained on " + num(m.train_rows) + " rows across " + num(m.n_features) + " features.";
       n.hidden = false;
     }
@@ -429,7 +413,7 @@
 
   function fail(msg) {
     $("stamp").textContent = msg;
-    ["tiles", "seasons", "models", "features", "sources", "preds"].forEach(function (id) {
+    ["tiles", "models", "features", "sources", "preds"].forEach(function (id) {
       var el = $(id);
       if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="empty">' + esc(msg) + '</div>';
     });
@@ -444,7 +428,6 @@
       $("stamp").textContent = d.generated_at
         ? "snapshot " + d.generated_at.replace("T", " ") : "snapshot loaded";
       renderDataset(d.dataset);
-      renderSeasons(d.dataset && d.dataset.per_season);
       renderModels(d.models);
       renderFeatures(d.feature_importance);
       renderSources(d.sources);

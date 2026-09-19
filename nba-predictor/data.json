@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T13:55:59",
+  "generated_at": "2026-09-19T18:50:35",
   "dataset": {
     "players": 134,
     "game_rows": 29372,
@@ -48,6 +48,8 @@
     "trained_at": "2026-09-18T13:55:42",
     "train_rows": 22964,
     "test_rows": 5742,
+    "test_start": "2025-11-07",
+    "test_end": "2026-04-12",
     "n_features": 52,
     "models": [
       {
