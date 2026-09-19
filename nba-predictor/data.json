@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-19T18:50:35",
+  "generated_at": "2026-09-19T19:02:27",
   "dataset": {
     "players": 134,
     "game_rows": 29372,
@@ -163,18 +163,6 @@
       "detail": "sportsbook player props",
       "rows": 0,
       "status": "awaiting season"
-    },
-    {
-      "name": "Kalshi",
-      "detail": "prediction market",
-      "rows": 0,
-      "status": "awaiting fix"
-    },
-    {
-      "name": "Polymarket",
-      "detail": "prediction market",
-      "rows": 0,
-      "status": "awaiting fix"
     },
     {
       "name": "ESPN",
