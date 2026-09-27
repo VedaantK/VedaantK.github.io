@@ -123,6 +123,16 @@ section {
   letter-spacing: 0.1em;
 }
 
+.scroll-hint-inline {
+  margin-left: auto;
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  color: var(--fg);
+  opacity: 0.45;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+}
+
 /* ═══════════════════════════════════════════════
    NAVIGATION
    ═══════════════════════════════════════════════ */
@@ -493,10 +503,28 @@ section {
   padding: 100px 2rem 80px;
 }
 
+/* Horizontal scroller, newest project card first (left) */
 .projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
   gap: 1.8rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 0.3rem 0.3rem 1.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cyan) var(--bg2);
+}
+
+.projects-grid::-webkit-scrollbar {
+  height: 10px;
+}
+
+.projects-grid::-webkit-scrollbar-track {
+  background: var(--bg2);
+}
+
+.projects-grid::-webkit-scrollbar-thumb {
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
 }
 
 .project-card {
@@ -506,6 +534,8 @@ section {
   flex-direction: column;
   gap: 0.9rem;
   transition: transform 0.2s;
+  flex: 0 0 320px;
+  scroll-snap-align: start;
 }
 
 .project-card:hover {
@@ -666,6 +696,170 @@ section {
   margin-bottom: 0.4rem;
 }
 
+/* ═══════════════════════════════════════════════
+   CHAT WIDGET (Vedaant.EXE)
+   ═══════════════════════════════════════════════ */
+.chat-widget {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.chat-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg2);
+  color: var(--fg);
+  padding: 0.75rem 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+}
+
+.chat-toggle-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.chat-panel {
+  width: 320px;
+  max-width: calc(100vw - 2.5rem);
+  height: 440px;
+  max-height: calc(100vh - 8rem);
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-panel[hidden] {
+  display: none;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 2px solid var(--border);
+  background: rgba(10, 10, 26, 0.6);
+  flex-shrink: 0;
+}
+
+.chat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: blink 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.chat-title {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+  flex: 1;
+}
+
+.chat-close {
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+}
+
+.chat-close:hover {
+  color: var(--accent);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.chat-msg {
+  max-width: 85%;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  border-radius: 2px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.chat-msg-bot {
+  align-self: flex-start;
+  background: rgba(255, 60, 110, 0.12);
+  border: 1px solid var(--accent);
+  color: var(--fg);
+}
+
+.chat-msg-user {
+  align-self: flex-end;
+  background: rgba(0, 245, 255, 0.1);
+  border: 1px solid var(--cyan);
+  color: var(--fg);
+}
+
+.chat-typing {
+  opacity: 0.6;
+}
+
+.chat-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-top: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--fg);
+  padding: 0.5rem 0.6rem;
+  font-family: var(--font-vt);
+  font-size: 1rem;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.chat-input:disabled {
+  opacity: 0.5;
+}
+
+.chat-send {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── HAMBURGER (hidden on desktop) ── */
 .nav-hamburger {
   display: none;
@@ -803,8 +997,11 @@ section {
   }
 
   /* ── Projects ── */
-  .projects-grid {
-    grid-template-columns: 1fr;
+  .project-card {
+    flex-basis: 82vw;
+  }
+  .scroll-hint-inline {
+    display: none;
   }
   .project-name {
     font-size: 0.6rem;
@@ -821,5 +1018,18 @@ section {
   /* ── Footer ── */
   .footer-text {
     font-size: 0.38rem;
+  }
+
+  /* ── Chat widget ── */
+  .chat-widget {
+    right: 1rem;
+    bottom: 1rem;
+  }
+  .chat-panel {
+    width: calc(100vw - 2rem);
+    height: 65vh;
+  }
+  .chat-toggle-label {
+    display: none;
   }
 }

@@ -145,30 +145,57 @@
     <div class="section-header">
       <span class="section-num">02 //</span>
       <h2 class="section-title">PROJECTS.DAT</h2>
-
+      <span class="scroll-hint-inline">◀ SCROLL ▶</span>
     </div>
 
+    <!-- Newest project first (left) — cards scroll horizontally, oldest ends up on the right -->
     <div class="projects-grid">
 
-      <!-- This portfolio is itself listed as a project, as required -->
+      <!-- Chat with Vedaant — AI persona chatbot (newest project) -->
       <article class="project-card pixel-border">
         <div class="project-top">
           <div class="project-bricks" aria-hidden="true">
-            <div class="pb b-cyan"></div><div class="pb b-cyan"></div><div class="pb b-cyan"></div>
+            <div class="pb b-red"></div><div class="pb b-red"></div><div class="pb b-red"></div>
           </div>
-          <span class="project-tag">PORTFOLIO</span>
+          <span class="project-tag">AI AGENT</span>
         </div>
-        <h3 class="project-name">THIS PORTFOLIO</h3>
+        <h3 class="project-name">CHAT WITH VEDAANT.EXE</h3>
         <p class="project-desc">
-          The site you're looking at. Retro 80s arcade aesthetic built with vanilla HTML, CSS, and
-          JavaScript. Responsive, interactive, and deployed on GitHub Pages.
+          An AI version of me, built from a persona system prompt so it actually sounds like me
+          instead of a generic assistant. FastAPI backend calling the OpenAI API, deployed on
+          Render. Try it in the chat bubble in the corner of this page.
         </p>
         <div class="project-tech">
-          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>GitHub Pages</span>
+          <span>Python</span><span>FastAPI</span><span>OpenAI API</span><span>Render</span>
         </div>
         <div class="project-links">
-          <a href="https://vedaantk.github.io" class="btn-sm" target="_blank" rel="noopener">[ LIVE ]</a>
-          <a href="https://github.com/VedaantK/VedaantK.github.io" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
+          <a href="#" class="btn-sm" data-open-chat>[ CHAT ]</a>
+          <a href="https://github.com/VedaantK/vedaant-chat" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
+        </div>
+      </article>
+
+      <!-- NBA Predictor — ML ensemble for player points props -->
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-green"></div><div class="pb b-green"></div><div class="pb b-green"></div>
+          </div>
+          <span class="project-tag">ML / DATA</span>
+        </div>
+        <h3 class="project-name">NBA PREDICTOR</h3>
+        <p class="project-desc">
+          Predicts NBA player points using an ensemble of Linear Regression,
+          Random Forest and XGBoost trained on 50+ engineered features. Converts
+          predictions into over/under probabilities and compares them against
+          sportsbook and prediction-market prices to surface positive expected
+          value. FastAPI backend, React dashboard, SQLite store.
+        </p>
+        <div class="project-tech">
+          <span>Python</span><span>scikit-learn</span><span>XGBoost</span><span>FastAPI</span><span>React</span>
+        </div>
+        <div class="project-links">
+          <a href="nba-predictor/" class="btn-sm">[ STATS ]</a>
+          <a href="https://github.com/VedaantK/nbapred" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
         </div>
       </article>
 
@@ -195,28 +222,25 @@
         </div>
       </article>
 
-      <!-- NBA Predictor — ML ensemble for player points props -->
+      <!-- This portfolio is itself listed as a project, as required (oldest) -->
       <article class="project-card pixel-border">
         <div class="project-top">
           <div class="project-bricks" aria-hidden="true">
-            <div class="pb b-green"></div><div class="pb b-green"></div><div class="pb b-green"></div>
+            <div class="pb b-cyan"></div><div class="pb b-cyan"></div><div class="pb b-cyan"></div>
           </div>
-          <span class="project-tag">ML / DATA</span>
+          <span class="project-tag">PORTFOLIO</span>
         </div>
-        <h3 class="project-name">NBA PREDICTOR</h3>
+        <h3 class="project-name">THIS PORTFOLIO</h3>
         <p class="project-desc">
-          Predicts NBA player points using an ensemble of Linear Regression,
-          Random Forest and XGBoost trained on 50+ engineered features. Converts
-          predictions into over/under probabilities and compares them against
-          sportsbook and prediction-market prices to surface positive expected
-          value. FastAPI backend, React dashboard, SQLite store.
+          The site you're looking at. Retro 80s arcade aesthetic built with vanilla HTML, CSS, and
+          JavaScript. Responsive, interactive, and deployed on GitHub Pages.
         </p>
         <div class="project-tech">
-          <span>Python</span><span>scikit-learn</span><span>XGBoost</span><span>FastAPI</span><span>React</span>
+          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>GitHub Pages</span>
         </div>
         <div class="project-links">
-          <a href="nba-predictor/" class="btn-sm">[ STATS ]</a>
-          <a href="https://github.com/VedaantK/nbapred" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
+          <a href="https://vedaantk.github.io" class="btn-sm" target="_blank" rel="noopener">[ LIVE ]</a>
+          <a href="https://github.com/VedaantK/VedaantK.github.io" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
         </div>
       </article>
 
@@ -259,7 +283,33 @@
     <p class="footer-text">© 2026 VEDAANT KULKARNI</p>
   </footer>
 
+  <!-- ── CHAT WIDGET (Vedaant.EXE) ──────────────────────────────
+       Floating chat button + panel, available from anywhere on the
+       page. Talks to the FastAPI backend in the vedaant-chat repo,
+       deployed on Render. data-api-url is the one place that needs
+       the live Render URL — see chat.js. -->
+  <div id="chatWidget" class="chat-widget" data-api-url="">
+    <button id="chatToggle" class="chat-toggle pixel-border" aria-expanded="false" aria-controls="chatPanel">
+      <span class="chat-toggle-icon" aria-hidden="true">💬</span>
+      <span class="chat-toggle-label">CHAT</span>
+    </button>
+
+    <div id="chatPanel" class="chat-panel pixel-border" hidden>
+      <div class="chat-header">
+        <span class="chat-dot" aria-hidden="true"></span>
+        <span class="chat-title">VEDAANT.EXE</span>
+        <button id="chatClose" class="chat-close" aria-label="Close chat">✕</button>
+      </div>
+      <div id="chatMessages" class="chat-messages" role="log" aria-live="polite"></div>
+      <form id="chatForm" class="chat-form">
+        <input id="chatInput" class="chat-input" type="text" autocomplete="off" placeholder="ask me anything..." maxlength="500" aria-label="Message" />
+        <button type="submit" class="chat-send btn-sm">SEND</button>
+      </form>
+    </div>
+  </div>
+
   <script src="main.js"></script>
   <script src="breakout.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
