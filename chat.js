@@ -99,6 +99,14 @@
         body: JSON.stringify({ message, history }),
       });
 
+      // 400/429 = the backend rejected the message (too long, rate limited, repeat);
+      // its detail is already written in my voice, so just show it.
+      if (res.status === 400 || res.status === 429) {
+        const err = await res.json().catch(() => ({}));
+        typingEl.remove();
+        addMessage('bot', err.detail || 'slow down a bit, try again in a minute');
+        return;
+      }
       if (!res.ok) throw new Error(`status ${res.status}`);
       const data = await res.json();
 
