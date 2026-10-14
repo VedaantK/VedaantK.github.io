@@ -12,19 +12,24 @@ I made a crossy road replica, but I wanted to change it a little bit, so I turne
 
 | Key | Action |
 |-----|--------|
-| `W` / `↑` | Move forward |
-| `S` / `↓` | Move backward |
-| `A` / `←` | Move left |
-| `D` / `→` | Move right |
+| `W` / `↑` | Drive forward (also starts the game) |
+| `S` / `↓` | Reverse (a few rows at most) |
+| `A` / `←` | Steer left |
+| `D` / `→` | Steer right |
+| `Enter` / `Space` | Start / drive again |
+
+On phones and tablets, on-screen arrow pads appear instead.
 
 **Scoring**
 
-Your score equals how many units forward you have traveled from the start. The further you go, the higher your score. There is no time limit.
+Your score is the furthest row you've reached. Your best score is saved in the browser. The
+road gets busier and the chickens get faster as your score climbs, maxing out around 120.
 
 **Losing**
 
-You lose if a car or truck hits your vehicle. A "Game Over" overlay appears showing your final score. Click **Restart** to play again from zero.
-
+It's Crossy Road flipped: you're the car, and the chickens are the traffic. Single chickens
+cross quickly; mother hens leading a line of chicks are long and slow. Bump into any of them
+and your run ends in a burst of feathers. Hit **Drive Again** (or `Enter`) to restart.
 
 ---
 

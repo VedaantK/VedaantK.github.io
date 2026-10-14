@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  Road Racer — Crossy Road-inspired 3D browser game
+  Road Racer — an inverted Crossy Road, as a 3D browser game
   Part of Vedaant Kulkarni's portfolio: https://vedaantk.github.io
   ============================================================
+
+  THE TWIST:
+  In Crossy Road you're a chicken dodging cars. Here it's flipped:
+  you're the car, and the chickens are the traffic. Flocks and
+  mother hens leading lines of chicks waddle across the road, and
+  one bump ends your run.
 
   AI USAGE:
   This game was built with the assistance of Claude (Anthropic).
   AI helped design the Three.js scene setup, infinite row generation
   logic, physics-based player movement (ACCEL/FRICTION model),
-  circle-vs-AABB collision detection, and camera lerp. I directed
-  the overall game design, tuned speed/difficulty values, chose the
-  colour palette, and tested gameplay to identify and fix edge cases
-  (e.g. camera snap on restart, single-grass blip between hazard clusters).
+  AABB collision detection, and camera lerp. In a later pass Claude
+  rebuilt it as the inverted version (car player, chicken hazards),
+  added lighting/shadows/fog, roadside scenery, a title screen,
+  best-score saving, a feather-burst crash animation, touch controls,
+  and shared geometries/materials so rows are cheap to create and
+  remove. I directed the overall game design, tuned speed/difficulty
+  values, chose the concept, and tested gameplay to identify and fix
+  edge cases (e.g. camera snap on restart, single safe-row blip
+  between hazard clusters).
 
   SOURCES & CREDITS:
   - Three.js r160 via jsDelivr CDN (https://cdn.jsdelivr.net/npm/three@0.160.0/)
     MIT License — https://github.com/mrdoob/three.js/blob/dev/LICENSE
+  - "Press Start 2P" font via Google Fonts (SIL Open Font License)
   - Game concept inspired by Crossy Road (Hipster Whale, 2014).
-    This is an independent fan recreation for educational purposes.
+    This is an independent fan project for educational purposes.
   ============================================================
 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Road Racer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
 
   <script type="importmap">
   {
@@ -36,83 +51,225 @@
   </script>
 
   <style>
+    :root {
+      --pink:   #ff3c6e;
+      --cyan:   #00f5ff;
+      --yellow: #ffe74c;
+      --ink:    #0a0a1a;
+      --font:   'Press Start 2P', monospace;
+    }
+
     *, *::before, *::after {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
+      height: 100%;
       overflow: hidden;
-      background: #000;
+      background: #8fd3ff;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     canvas {
       display: block;
     }
 
-    /* HUD — score display (top-center) */
-    #hud-score {
+    /* HUD — score (top-left), best (under it) */
+    #hud {
       position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: max(16px, env(safe-area-inset-top));
+      left: 16px;
+      font-family: var(--font);
       color: #fff;
-      font-family: monospace;
-      font-size: 24px;
-      font-weight: bold;
-      text-shadow: 0 1px 4px #000;
       pointer-events: none;
-      user-select: none;
+      text-shadow: 3px 3px 0 var(--ink);
     }
 
-    /* Game-over overlay */
-    #overlay {
+    #hud-score {
+      font-size: 36px;
+    }
+
+    #hud-best {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--yellow);
+    }
+
+    #hud-hint {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font);
+      font-size: 10px;
+      color: #fff;
+      text-shadow: 2px 2px 0 var(--ink);
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity 0.6s;
+    }
+
+    /* Title + game-over screens share the same panel styling */
+    .screen {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.55);
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      padding: 16px;
+      background: rgba(10, 10, 26, 0.45);
     }
 
-    #overlay.visible {
+    .screen.visible {
       display: flex;
     }
 
-    #overlay-title {
+    .panel {
+      width: min(440px, 100%);
+      padding: 28px 22px;
+      text-align: center;
+      font-family: var(--font);
       color: #fff;
-      font-family: monospace;
-      font-size: 48px;
-      font-weight: bold;
-      text-shadow: 0 2px 8px #000;
+      background: var(--ink);
+      border: 4px solid var(--cyan);
+      box-shadow: 0 0 0 4px var(--ink), 0 0 24px rgba(0, 245, 255, 0.45), 8px 8px 0 4px rgba(0,0,0,0.35);
+      animation: pop 0.25s ease-out;
     }
 
-    #overlay-score {
-      color: #eee;
-      font-family: monospace;
-      font-size: 28px;
-      text-shadow: 0 1px 4px #000;
+    @keyframes pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
     }
 
-    #btn-restart {
-      margin-top: 8px;
-      padding: 12px 32px;
-      font-family: monospace;
-      font-size: 20px;
-      cursor: pointer;
+    .panel h1 {
+      margin: 0 0 14px;
+      font-size: clamp(22px, 7vw, 34px);
+      line-height: 1.3;
+      color: var(--yellow);
+      text-shadow: 3px 3px 0 var(--pink);
+    }
+
+    .panel .tagline {
+      margin: 0 0 22px;
+      font-size: 10px;
+      line-height: 1.9;
+      color: #c8c8f0;
+    }
+
+    .panel .big {
+      margin: 6px 0;
+      font-size: 30px;
+    }
+
+    .panel .label {
+      font-size: 10px;
+      color: #9a9ac8;
+    }
+
+    .panel .new-best {
+      margin: 10px 0 0;
+      font-size: 11px;
+      color: var(--yellow);
+      animation: blink 0.6s steps(2) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .controls {
+      margin: 0 0 22px;
+      font-size: 9px;
+      line-height: 2.2;
+      color: #9a9ac8;
+    }
+
+    .controls kbd {
+      font-family: var(--font);
+      padding: 2px 5px;
+      border: 2px solid #3a3a6e;
+      color: #fff;
+    }
+
+    .btn {
+      margin-top: 18px;
+      padding: 14px 26px;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--yellow);
       border: none;
-      border-radius: 6px;
-      background: #33cc33;
-      color: #fff;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-      transition: background 0.15s;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 var(--pink);
+      transition: transform 0.08s, box-shadow 0.08s;
     }
 
-    #btn-restart:hover {
-      background: #29a829;
+    .btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 var(--pink);
+    }
+
+    .btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 var(--pink);
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid var(--cyan);
+      outline-offset: 4px;
+    }
+
+    /* Touch controls, only on touch screens */
+    #touch {
+      display: none;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      padding: 0 16px;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    #touch .pad {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    #touch .pad-v {
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #touch button {
+      width: 68px;
+      height: 68px;
+      font-family: var(--font);
+      font-size: 22px;
+      color: #fff;
+      background: rgba(10, 10, 26, 0.45);
+      border: 3px solid rgba(255, 255, 255, 0.7);
+      border-radius: 14px;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    #touch button.held {
+      background: rgba(0, 245, 255, 0.45);
+    }
+
+    @media (pointer: coarse) {
+      #touch.active { display: flex; }
+      #hud-hint { display: none; }
+      .controls .keys { display: none; }
+    }
+
+    @media (pointer: fine) {
+      .controls .tap { display: none; }
     }
   </style>
 </head>
@@ -120,12 +277,45 @@
 
   <canvas id="game-canvas"></canvas>
 
-  <div id="hud-score">Score: 0</div>
+  <div id="hud">
+    <div id="hud-score">0</div>
+    <div id="hud-best">BEST 0</div>
+  </div>
+  <div id="hud-hint">WATCH OUT FOR CHICKENS</div>
 
-  <div id="overlay">
-    <div id="overlay-title">Game Over</div>
-    <div id="overlay-score">Score: 0</div>
-    <button id="btn-restart">Restart</button>
+  <div id="touch">
+    <div class="pad">
+      <button data-key="ArrowLeft"  aria-label="Steer left">&#9664;</button>
+      <button data-key="ArrowRight" aria-label="Steer right">&#9654;</button>
+    </div>
+    <div class="pad pad-v">
+      <button data-key="ArrowUp"   aria-label="Drive forward">&#9650;</button>
+      <button data-key="ArrowDown" aria-label="Reverse">&#9660;</button>
+    </div>
+  </div>
+
+  <div id="title-screen" class="screen visible">
+    <div class="panel">
+      <h1>ROAD<br>RACER</h1>
+      <p class="tagline">why did the chicken cross the road?<br>to ruin your run.</p>
+      <div class="controls">
+        <div class="keys"><kbd>W</kbd> <kbd>&uarr;</kbd> drive &nbsp; <kbd>S</kbd> <kbd>&darr;</kbd> reverse<br><kbd>A</kbd> <kbd>D</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd> steer</div>
+        <div class="tap">use the arrow pads to drive</div>
+      </div>
+      <div class="label">BEST <span id="title-best">0</span></div>
+      <button id="btn-start" class="btn">START</button>
+    </div>
+  </div>
+
+  <div id="over-screen" class="screen">
+    <div class="panel">
+      <h1>BAWK!</h1>
+      <div class="label">SCORE</div>
+      <div class="big" id="over-score">0</div>
+      <div class="label">BEST <span id="over-best">0</span></div>
+      <p class="new-best" id="over-new-best" hidden>NEW BEST!</p>
+      <button id="btn-restart" class="btn">DRIVE AGAIN</button>
+    </div>
   </div>
 
   <script type="module">
@@ -136,23 +326,150 @@
     // -------------------------------------------------------------------------
     const ROAD_WIDTH      = 11;
     const ROW_DEPTH       = 1.0;
+    const WALK_SPAN       = ROAD_WIDTH + 6;  // chickens wander in/out from the verges
     const PLAYER_SPEED    = 5.0;
     const PLAYER_LATERAL  = 6.0;
     const ACCEL           = 18.0;
     const FRICTION        = 10.0;
-    const DIFF_HARD       = 20;
-    const CULL_BEHIND     = 20;
-    const GENERATE_AHEAD  = 12;
-    const BUFFER_TRIGGER  = 6;
+    const RAMP_SCORE      = 120;   // difficulty reaches max at this score
+    const CULL_BEHIND     = 14;
+    const MAX_REVERSE     = 3;     // how far back from your best you can reverse
     const START_Z         = 0;
 
-    const COLOR_PLAYER     = 0xffdd00;
-    const COLOR_CAR        = 0xff3333;
-    const COLOR_TRUCK      = 0xff8800;
-    const COLOR_GRASS      = 0x55aa44;
-    const COLOR_ROAD       = 0x555555;
-    const COLOR_TRUCK_ROAD = 0x333333;
-    const COLOR_ROAD_LINE  = 0xffff99;
+    const SKY_COLOR       = 0x8fd3ff;
+    const GRASS_COLOR     = 0x6cc24a;
+    const BEST_KEY        = 'roadRacerBest';
+
+    // -------------------------------------------------------------------------
+    // Shared geometries + materials. Rows reuse these instead of creating
+    // their own, so spawning/culling rows never allocates GPU buffers.
+    // -------------------------------------------------------------------------
+    const lambert = color => new THREE.MeshLambertMaterial({ color });
+
+    const MAT = {
+      white:      lambert(0xfafafa),
+      brownHen:   lambert(0xb5652b),
+      chick:      lambert(0xffd83a),
+      comb:       lambert(0xe8262f),
+      beak:       lambert(0xff9a1f),
+      eye:        lambert(0x111111),
+      trunk:      lambert(0x7a4a25),
+      leaf:       lambert(0x3f9b3a),
+      leafLight:  lambert(0x5dbb47),
+      bush:       lambert(0x4aa63e),
+      hay:        lambert(0xe9c25a),
+      barn:       lambert(0xb8322b),
+      barnTrim:   lambert(0xf3eee2),
+      roof:       lambert(0x5a3b2e),
+      fence:      lambert(0xd9b98a),
+      kerbRed:    lambert(0xe23b3b),
+      kerbWhite:  lambert(0xf2f2f2),
+      post:       lambert(0x8a8f99),
+      carBody:    lambert(0xff3c6e),
+      carStripe:  lambert(0xffffff),
+      carGlass:   lambert(0x1d2a4a),
+      tire:       lambert(0x1b1b1f),
+      hub:        lambert(0xc9ccd6),
+      headlight:  new THREE.MeshBasicMaterial({ color: 0xfff6c2 }),
+      taillight:  new THREE.MeshBasicMaterial({ color: 0xff2030 }),
+      feather:    new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }),
+      grass:      lambert(GRASS_COLOR),
+    };
+
+    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+
+    const GEO = {
+      rowPlane:  new THREE.PlaneGeometry(ROAD_WIDTH, ROW_DEPTH),
+      kerb:      box(0.3, 0.08, ROW_DEPTH),
+      fenceRail: box(0.06, 0.08, ROW_DEPTH),
+      fencePost: box(0.1, 0.5, 0.1),
+      trunk:     box(0.25, 0.5, 0.25),
+      leafBig:   box(0.9, 0.7, 0.9),
+      leafSmall: box(0.55, 0.45, 0.55),
+      bush:      box(0.7, 0.4, 0.6),
+      hay:       new THREE.CylinderGeometry(0.4, 0.4, 0.55, 10),
+      barn:      box(2.6, 1.6, 2.0),
+      barnDoor:  box(0.06, 1.0, 0.9),
+      roof:      new THREE.CylinderGeometry(1.6, 1.6, 2.1, 3, 1),
+      signPost:  box(0.06, 0.9, 0.06),
+      sign:      new THREE.PlaneGeometry(0.7, 0.7),
+      feather:   new THREE.PlaneGeometry(0.14, 0.07),
+      unit:      box(1, 1, 1),  // scaled per use for bird parts
+    };
+
+    // -------------------------------------------------------------------------
+    // Canvas textures: asphalt with lane markings, and zebra-striped
+    // chicken crossings. One texture per kind, shared by every row.
+    // -------------------------------------------------------------------------
+    function makeRoadTexture(kind) {
+      const W = 1024;
+      const H = Math.round(W / ROAD_WIDTH);
+      const px = W / ROAD_WIDTH;
+      const c = document.createElement('canvas');
+      c.width = W;
+      c.height = H;
+      const g = c.getContext('2d');
+
+      g.fillStyle = '#3d414c';
+      g.fillRect(0, 0, W, H);
+      // Asphalt speckle
+      for (let i = 0; i < 500; i++) {
+        g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.12)';
+        g.fillRect(Math.random() * W, Math.random() * H, 2 + Math.random() * 3, 2 + Math.random() * 3);
+      }
+
+      // Solid white edge lines
+      g.fillStyle = '#f4f4f4';
+      g.fillRect(0.25 * px, 0, 0.1 * px, H);
+      g.fillRect(W - 0.35 * px, 0, 0.1 * px, H);
+
+      if (kind === 'road') {
+        // Dashed lane dividers (half a row long, so consecutive rows read as dashes)
+        for (const lx of [ROAD_WIDTH / 4, (ROAD_WIDTH * 3) / 4]) {
+          g.fillRect(lx * px - 0.05 * px, H * 0.25, 0.1 * px, H * 0.5);
+        }
+        // Double yellow centre line
+        g.fillStyle = '#ffd23f';
+        g.fillRect((ROAD_WIDTH / 2 - 0.12) * px, 0, 0.07 * px, H);
+        g.fillRect((ROAD_WIDTH / 2 + 0.05) * px, 0, 0.07 * px, H);
+      } else {
+        // Zebra crossing
+        g.fillStyle = '#f4f4f4';
+        for (let x = 0.6; x < ROAD_WIDTH - 0.6; x += 0.8) {
+          g.fillRect(x * px, H * 0.1, 0.42 * px, H * 0.8);
+        }
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    function makeSignTexture() {
+      const S = 128;
+      const c = document.createElement('canvas');
+      c.width = S;
+      c.height = S;
+      const g = c.getContext('2d');
+      g.translate(S / 2, S / 2);
+      g.rotate(Math.PI / 4);
+      g.fillStyle = '#111';
+      g.fillRect(-44, -44, 88, 88);
+      g.fillStyle = '#ffd23f';
+      g.fillRect(-38, -38, 76, 76);
+      g.rotate(-Math.PI / 4);
+      g.font = '46px serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText('\u{1F414}', 0, 4);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const roadMat     = new THREE.MeshLambertMaterial({ map: makeRoadTexture('road') });
+    const crossingMat = new THREE.MeshLambertMaterial({ map: makeRoadTexture('crossing') });
+    const signMat     = new THREE.MeshLambertMaterial({ map: makeSignTexture(), transparent: true, alphaTest: 0.5 });
 
     // -------------------------------------------------------------------------
     // Renderer
@@ -162,54 +479,101 @@
         this.scene  = null;
         this.camera = null;
         this.webgl  = null;
-        this.CAMERA_OFFSET   = new THREE.Vector3(0, 8, 8);
-        this.TARGET_ROTATION = new THREE.Euler(-0.65, 0, 0);
+        this.BASE_OFFSET   = new THREE.Vector3(0, 8, 8);
+        this.CAMERA_OFFSET = this.BASE_OFFSET.clone();
+        this.shake = 0;
       }
 
       init(canvas) {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87ceeb);
+        this.scene.background = new THREE.Color(SKY_COLOR);
+        this.scene.fog = new THREE.Fog(SKY_COLOR, 16, 30);
 
-        this.webgl = new THREE.WebGLRenderer({ canvas, antialias: true });
-        this.webgl.setPixelRatio(window.devicePixelRatio);
-        this.webgl.setSize(window.innerWidth, window.innerHeight);
+        this.webgl = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+        this.webgl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.webgl.shadowMap.enabled = true;
+        this.webgl.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        const aspect = window.innerWidth / window.innerHeight;
-        this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 500);
-        this.camera.rotation.copy(this.TARGET_ROTATION);
-        this.camera.position.set(
-          this.CAMERA_OFFSET.x,
-          this.CAMERA_OFFSET.y,
-          START_Z + this.CAMERA_OFFSET.z
-        );
+        const aniso = Math.min(8, this.webgl.capabilities.getMaxAnisotropy());
+        roadMat.map.anisotropy = aniso;
+        crossingMat.map.anisotropy = aniso;
 
-        window.addEventListener('resize', () => {
-          this.webgl.setSize(window.innerWidth, window.innerHeight);
-          this.camera.aspect = window.innerWidth / window.innerHeight;
-          this.camera.updateProjectionMatrix();
-        });
+        this.camera = new THREE.PerspectiveCamera(55, 1, 0.1, 80);
+        this.camera.rotation.set(-0.72, 0, 0);
 
+        // Lighting: soft sky/ground fill plus a sun that casts shadows.
+        // The sun follows the player so a small shadow map stays sharp.
+        this.scene.add(new THREE.HemisphereLight(0xdff3ff, 0x5a7a3a, 1.6));
+        this.sun = new THREE.DirectionalLight(0xfff1d6, 2.2);
+        this.sun.castShadow = true;
+        this.sun.shadow.mapSize.set(1024, 1024);
+        const sc = this.sun.shadow.camera;
+        sc.left = -14; sc.right = 14; sc.top = 16; sc.bottom = -12;
+        sc.near = 1; sc.far = 40;
+        this.sun.shadow.bias = -0.0008;
+        this.scene.add(this.sun, this.sun.target);
+
+        // One big grass field that follows the player, under the road rows
+        this.ground = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), MAT.grass);
+        this.ground.rotation.x = -Math.PI / 2;
+        this.ground.position.y = -0.02;
+        this.ground.receiveShadow = true;
+        this.scene.add(this.ground);
+
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
         return this.scene;
       }
 
-      update(playerWorldPos) {
-        const targetX = playerWorldPos.x + this.CAMERA_OFFSET.x;
-        const targetY = playerWorldPos.y + this.CAMERA_OFFSET.y;
-        const targetZ = playerWorldPos.z + this.CAMERA_OFFSET.z;
-
-        this.camera.position.x += (targetX - this.camera.position.x) * 0.10;
-        this.camera.position.y += (targetY - this.camera.position.y) * 0.10;
-        this.camera.position.z += (targetZ - this.camera.position.z) * 0.10;
+      // On tall/narrow screens pull the camera back so the road still fits.
+      resize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const aspect = w / h;
+        this.webgl.setSize(w, h);
+        this.camera.aspect = aspect;
+        this.camera.updateProjectionMatrix();
+        const zoom = Math.max(1, 0.7 / aspect);
+        // Portrait: aim a little further up the road so the car sits lower on screen
+        this.camera.rotation.x = aspect < 1 ? -0.6 : -0.72;
+        this.CAMERA_OFFSET.copy(this.BASE_OFFSET).multiplyScalar(zoom);
+        this.scene.fog.near = 16 * zoom;
+        this.scene.fog.far  = 30 * zoom;
+        this.camera.far = 40 * zoom;
+        this.camera.updateProjectionMatrix();
+        // Rows past the fog's far edge are invisible, so that's how far ahead to build.
+        const o = this.CAMERA_OFFSET;
+        this.rowsVisibleAhead = Math.ceil(Math.sqrt(this.scene.fog.far ** 2 - o.y ** 2) - o.z) + 3;
+        if (this.onResize) this.onResize();
       }
 
-      // Instantly snap camera to the correct position above a world point.
-      // Call this on init and on restart to avoid lerp pop.
-      snapTo(playerWorldPos) {
+      update(target, dt) {
+        const k = 1 - Math.pow(0.0015, dt);  // framerate-independent lerp
+        const cam = this.camera.position;
+        cam.x += (target.x * 0.6 + this.CAMERA_OFFSET.x - cam.x) * k;
+        cam.y += (this.CAMERA_OFFSET.y - cam.y) * k;
+        cam.z += (target.z + this.CAMERA_OFFSET.z - cam.z) * k;
+
+        this.sun.position.set(target.x + 6, 14, target.z + 4);
+        this.sun.target.position.set(target.x, 0, target.z - 3);
+        this.ground.position.x = target.x;
+        this.ground.position.z = target.z - 20;
+
+        if (this.shake > 0) {
+          this.shake = Math.max(0, this.shake - dt * 2.5);
+          cam.x += (Math.random() - 0.5) * this.shake * 0.5;
+          cam.y += (Math.random() - 0.5) * this.shake * 0.5;
+        }
+      }
+
+      // Instantly place the camera — used on start and restart to avoid a lerp sweep.
+      snapTo(target) {
         this.camera.position.set(
-          playerWorldPos.x + this.CAMERA_OFFSET.x,
-          playerWorldPos.y + this.CAMERA_OFFSET.y,
-          playerWorldPos.z + this.CAMERA_OFFSET.z
+          target.x * 0.6 + this.CAMERA_OFFSET.x,
+          this.CAMERA_OFFSET.y,
+          target.z + this.CAMERA_OFFSET.z
         );
+        this.shake = 0;
       }
 
       render() {
@@ -218,98 +582,124 @@
     }
 
     // -------------------------------------------------------------------------
-    // Build a car/truck group mesh
+    // Birds
     // -------------------------------------------------------------------------
-    function buildVehicleMesh(width, height, depth, bodyColor, cabColor) {
+    function part(group, mat, w, h, d, x, y, z, shadow = false) {
+      const m = new THREE.Mesh(GEO.unit, mat);
+      m.scale.set(w, h, d);
+      m.position.set(x, y, z);
+      m.castShadow = shadow;
+      group.add(m);
+      return m;
+    }
+
+    // A blocky chicken facing +x. kind: 'hen' (white), 'brown', or 'chick'.
+    function buildBird(kind) {
+      const g = new THREE.Group();
+      const isChick = kind === 'chick';
+      const bodyMat = isChick ? MAT.chick : kind === 'brown' ? MAT.brownHen : MAT.white;
+
+      const body = new THREE.Group();
+      g.add(body);
+      part(body, bodyMat, 0.42, 0.34, 0.36, 0, 0.36, 0, true);       // body
+      part(body, bodyMat, 0.12, 0.2, 0.26, -0.24, 0.48, 0);          // tail
+      part(body, bodyMat, 0.22, 0.26, 0.24, 0.2, 0.62, 0, true);     // head/neck
+      part(body, MAT.beak, 0.1, 0.07, 0.1, 0.35, 0.62, 0);            // beak
+      part(body, MAT.eye, 0.04, 0.05, 0.26, 0.26, 0.67, 0);           // eyes (one bar, pokes out both sides)
+      if (!isChick) {
+        part(body, MAT.comb, 0.14, 0.1, 0.06, 0.2, 0.8, 0);           // comb
+        part(body, MAT.comb, 0.05, 0.08, 0.05, 0.31, 0.53, 0);        // wattle
+      }
+      const wingL = part(body, bodyMat, 0.26, 0.18, 0.04, -0.02, 0.4, 0.2);
+      const wingR = part(body, bodyMat, 0.26, 0.18, 0.04, -0.02, 0.4, -0.2);
+      const legL  = part(g, MAT.beak, 0.04, 0.2, 0.04, 0, 0.1, 0.08);
+      const legR  = part(g, MAT.beak, 0.04, 0.2, 0.04, 0, 0.1, -0.08);
+
+      g.userData.anim = { body, wingL, wingR, legL, legR, phase: Math.random() * Math.PI * 2 };
+      if (isChick) g.scale.setScalar(0.55);
+      return g;
+    }
+
+    // Obstacle mesh for a row hazard; returns the group and a list of birds to animate.
+    function buildHazardMesh(type) {
       const group = new THREE.Group();
+      const birds = [];
+      if (type === 'flock') {
+        const b = buildBird(Math.random() < 0.3 ? 'brown' : 'hen');
+        group.add(b);
+        birds.push(b);
+      } else {
+        // Mother hen leading three chicks
+        const hen = buildBird('brown');
+        hen.position.x = 0.7;
+        group.add(hen);
+        birds.push(hen);
+        for (const cx of [0.1, -0.35, -0.8]) {
+          const chick = buildBird('chick');
+          chick.position.x = cx;
+          group.add(chick);
+          birds.push(chick);
+        }
+      }
+      return { group, birds };
+    }
 
-      // Body
-      const bodyGeo = new THREE.BoxGeometry(width, height, depth);
-      const bodyMat = new THREE.MeshBasicMaterial({ color: bodyColor });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = height / 2;
-      group.add(body);
-
-      // Cab on top, toward the front
-      const cabW = width * 0.6;
-      const cabH = height * 0.7;
-      const cabD = depth * 0.45;
-      const cabGeo = new THREE.BoxGeometry(cabW, cabH, cabD);
-      const cabMat = new THREE.MeshBasicMaterial({ color: cabColor });
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.set(0, height + cabH / 2, -depth * 0.1);
-      group.add(cab);
-
-      return group;
+    function animateBirds(birds, t, speed) {
+      const rate = 6 + speed * 2.2;
+      for (const b of birds) {
+        const a = b.userData.anim;
+        const s = Math.sin(t * rate + a.phase);
+        a.body.position.y = Math.abs(s) * 0.05;
+        a.body.rotation.z = s * 0.06;
+        a.legL.rotation.z =  s * 0.6;
+        a.legR.rotation.z = -s * 0.6;
+        const flap = Math.max(0, Math.sin(t * rate * 0.5 + a.phase)) * 0.5;
+        a.wingL.rotation.x = -flap;
+        a.wingR.rotation.x =  flap;
+      }
     }
 
     // -------------------------------------------------------------------------
     // Row generator
+    // Safe rows are plain road; hazard rows are chicken crossings:
+    //   'flock'  — single chickens, quicker
+    //   'parade' — a mother hen + chicks, long and slow (the old "truck")
     // -------------------------------------------------------------------------
+    const isHazard = t => t === 'flock' || t === 'parade';
+
     function generateRow(rowIndex, previousRows, score) {
-      // Spawn zone: first few rows always grass
-      if (rowIndex <= 3) {
-        return { type: 'grass', index: rowIndex, obstacles: [] };
+      if (rowIndex <= 3) return { type: 'road', index: rowIndex, obstacles: [] };
+
+      const d = Math.min(1, score / RAMP_SCORE);  // 0 → 1 difficulty
+
+      const trailing = pred => {
+        let n = 0;
+        for (let i = previousRows.length - 1; i >= 0 && pred(previousRows[i].type); i--) n++;
+        return n;
+      };
+      const flockRun  = trailing(t => t === 'flock');
+      const paradeRun = trailing(t => t === 'parade');
+      const hazardRun = trailing(isHazard);
+      const safeRun   = trailing(t => t === 'road');
+
+      // After a hazard section, require at least 2 safe rows before the next one.
+      // This prevents single safe "blips" between back-to-back hazard clusters.
+      const hadHazardRecently = previousRows.some(r => isHazard(r.type));
+      if (hadHazardRecently && safeRun === 1) return { type: 'road', index: rowIndex, obstacles: [] };
+
+      // Max 2 of a kind in a row, max 2 hazards in a row overall
+      const allowed = ['road'];
+      if (hazardRun < 2) {
+        if (flockRun  < 2) allowed.push('flock');
+        if (paradeRun < 2) allowed.push('parade');
       }
+      if (allowed.length === 1) return { type: 'road', index: rowIndex, obstacles: [] };
 
-      const tier = score < DIFF_HARD ? 0 : 1;
-
-      // Count trailing runs
-      let roadRun = 0;
-      for (let i = previousRows.length - 1; i >= 0; i--) {
-        if (previousRows[i].type === 'road') roadRun++;
-        else break;
-      }
-      let truckRun = 0;
-      for (let i = previousRows.length - 1; i >= 0; i--) {
-        if (previousRows[i].type === 'truck') truckRun++;
-        else break;
-      }
-      // Combined consecutive hazard rows (any mix of road + truck)
-      let hazardRun = 0;
-      for (let i = previousRows.length - 1; i >= 0; i--) {
-        const t = previousRows[i].type;
-        if (t === 'road' || t === 'truck') hazardRun++;
-        else break;
-      }
-      // Consecutive grass rows since last hazard
-      let grassRun = 0;
-      for (let i = previousRows.length - 1; i >= 0; i--) {
-        if (previousRows[i].type === 'grass') grassRun++;
-        else break;
-      }
-
-      const allowed = ['grass', 'road', 'truck'];
-
-      // After any hazard section, require at least 2 grass rows before next hazard
-      // This prevents single-grass "blips" between back-to-back hazard clusters
-      const hadHazardRecently = previousRows.some(r => r.type === 'road' || r.type === 'truck');
-      if (hadHazardRecently && grassRun < 2 && grassRun > 0) {
-        // Just had 1 grass after hazards — force another grass
-        return { type: 'grass', index: rowIndex, obstacles: [] };
-      }
-
-      // Individual type caps: max 2 of the same type in a row
-      if (roadRun  >= 2) allowed.splice(allowed.indexOf('road'),  1);
-      if (truckRun >= 2) allowed.splice(allowed.indexOf('truck'), 1);
-
-      // Combined hazard cap: max 2 consecutive hazard rows total
-      if (hazardRun >= 2) {
-        allowed.length = 0;
-        allowed.push('grass');
-      }
-      if (allowed.length === 0) allowed.push('grass');
-
-      // If grass is the only option, return immediately
-      if (allowed.length === 1 && allowed[0] === 'grass') {
-        return { type: 'grass', index: rowIndex, obstacles: [] };
-      }
-
-      // Weights tuned for readable rhythm: roughly 1–2 hazard rows then 2 grass
-      const weights = tier === 0
-        ? { grass: 0.55, road: 0.30, truck: 0.15 }
-        : { grass: 0.40, road: 0.38, truck: 0.22 };
-
+      const weights = {
+        road:   0.55 - 0.17 * d,
+        flock:  0.30 + 0.10 * d,
+        parade: 0.15 + 0.07 * d,
+      };
       let total = 0;
       for (const t of allowed) total += weights[t];
       let rand = Math.random() * total;
@@ -319,73 +709,132 @@
         if (rand <= 0) { chosen = t; break; }
       }
 
-      return buildRowConfig(rowIndex, chosen, tier);
+      return buildRowConfig(rowIndex, chosen, d);
     }
 
-    function buildRowConfig(rowIndex, type, tier) {
+    function buildRowConfig(rowIndex, type, d) {
       const config = { type, index: rowIndex, obstacles: [] };
+      if (type === 'road') return config;
 
-      if (type === 'road') {
-        const count     = 1 + Math.floor(Math.random() * 3); // 1–3
-        const direction = Math.random() < 0.5 ? 1 : -1;
-        const minSpeed  = tier === 0 ? 2 : 4;
-        const maxSpeed  = tier === 0 ? 7 : 11;
-        const width     = 0.75;
-        const depth     = 0.9;
-        // ONE speed for the whole row — prevents faster cars catching slower ones
-        const rowSpeed  = minSpeed + Math.random() * (maxSpeed - minSpeed);
-        config.direction = direction;
+      const lerp = (a, b) => a + (b - a) * d;
+      const direction = Math.random() < 0.5 ? 1 : -1;
+      let count, width, depth, minSpeed, maxSpeed, gap;
 
-        const positions = placeObstacles(count, width, 0.5);
-        for (const x of positions) {
-          config.obstacles.push({ type: 'car', row: rowIndex, x, width, depth, height: 0.35, speed: rowSpeed, direction });
-        }
-
-      } else if (type === 'truck') {
-        const count     = 1 + Math.floor(Math.random() * 2); // 1–2
-        const direction = Math.random() < 0.5 ? 1 : -1;
-        const minSpeed  = tier === 0 ? 1 : 2;
-        const maxSpeed  = tier === 0 ? 3 : 5;
-        const width     = 1.8;
-        const depth     = 0.95;
-        // ONE speed for the whole row
-        const rowSpeed  = minSpeed + Math.random() * (maxSpeed - minSpeed);
-        config.direction = direction;
-
-        const positions = placeObstacles(count, width, 0.6);
-        for (const x of positions) {
-          config.obstacles.push({ type: 'truck', row: rowIndex, x, width, depth, height: 0.45, speed: rowSpeed, direction });
-        }
+      if (type === 'flock') {
+        count    = 2 + Math.floor(Math.random() * (2 + Math.round(d * 2)));  // 2–3, up to 2–5
+        width    = 0.5;
+        depth    = 0.4;
+        minSpeed = lerp(2.0, 3.8);
+        maxSpeed = lerp(5.0, 8.5);
+        gap      = 1.2;
+      } else {
+        count    = 1 + Math.floor(Math.random() * 2);  // 1–2 families
+        width    = 2.0;
+        depth    = 0.45;
+        minSpeed = lerp(1.0, 2.0);
+        maxSpeed = lerp(2.4, 4.2);
+        gap      = 1.6;
       }
 
+      // ONE speed for the whole row — birds in a row never catch each other
+      const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
+      config.direction = direction;
+
+      for (const x of placeObstacles(count, width, gap)) {
+        config.obstacles.push({ x, width, depth, speed, direction });
+      }
       return config;
     }
 
     /**
-     * Sequential left-to-right obstacle placement — guarantees no overlaps.
-     * @param {number} count   - how many obstacles to attempt
-     * @param {number} width   - each obstacle's width
-     * @param {number} gap     - minimum gap before each obstacle
-     * @returns {number[]}     - array of x center positions
+     * Sequential left-to-right placement across the walking span — guarantees no overlaps.
+     * @returns {number[]} x centre positions
      */
     function placeObstacles(count, width, gap) {
       const positions = [];
-      let cursor = -ROAD_WIDTH / 2;
-      // Total slack space after placing all obstacles with minimum gaps
-      const slack = Math.max(0, ROAD_WIDTH - count * (width + gap) - gap);
-
+      let cursor = -WALK_SPAN / 2;
+      const slack = Math.max(0, WALK_SPAN - count * (width + gap) - gap);
       for (let i = 0; i < count; i++) {
-        // Minimum safe center for this obstacle
         const xCenter = cursor + gap + width / 2;
-        // Right edge of this obstacle
-        const xRight = xCenter + width / 2;
-        if (xRight > ROAD_WIDTH / 2 - 0.2) break; // no room, stop placing
+        const xRight  = xCenter + width / 2;
+        if (xRight > WALK_SPAN / 2) break;
         positions.push(xCenter);
-        // Advance cursor past this obstacle, then add a random portion of slack
         cursor = xRight + Math.random() * (slack / count);
       }
-
       return positions;
+    }
+
+    // -------------------------------------------------------------------------
+    // Scenery (verges either side of the road)
+    // -------------------------------------------------------------------------
+    function addMesh(parent, geo, mat, x, y, z, { cast = false, receive = false } = {}) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      m.castShadow = cast;
+      m.receiveShadow = receive;
+      parent.add(m);
+      return m;
+    }
+
+    function addTree(parent, x, z) {
+      const t = new THREE.Group();
+      t.position.set(x, 0, z);
+      t.scale.setScalar(0.85 + Math.random() * 0.5);
+      t.rotation.y = Math.random() * Math.PI;
+      addMesh(t, GEO.trunk, MAT.trunk, 0, 0.25, 0, { cast: true });
+      addMesh(t, GEO.leafBig, MAT.leaf, 0, 0.85, 0, { cast: true });
+      addMesh(t, GEO.leafSmall, MAT.leafLight, 0, 1.4, 0, { cast: true });
+      parent.add(t);
+    }
+
+    function addBarn(parent, side, z) {
+      const b = new THREE.Group();
+      b.position.set(side * 12.5, 0, z);
+      addMesh(b, GEO.barn, MAT.barn, 0, 0.8, 0, { cast: true });
+      // 3-sided cylinder = triangular prism; tip it so the ridge runs along z, apex up,
+      // and squash it (local z becomes world y after the tilt) into a lower roof.
+      const roof = addMesh(b, GEO.roof, MAT.roof, 0, 1.6 + 0.44, 0, { cast: true });
+      roof.rotation.x = -Math.PI / 2;
+      roof.scale.set(1, 1, 0.55);
+      addMesh(b, GEO.barnDoor, MAT.barnTrim, -side * 1.31, 0.5, 0);
+      parent.add(b);
+    }
+
+    function decorateVerge(parent, side, z, rowIndex, isCrossing) {
+      const edge = ROAD_WIDTH / 2;
+
+      // Racing kerb, alternating red/white each row
+      const kerbMat = (rowIndex & 1) ? MAT.kerbRed : MAT.kerbWhite;
+      addMesh(parent, GEO.kerb, kerbMat, side * (edge + 0.15), 0.04, z, { receive: true });
+
+      // Wooden fence
+      addMesh(parent, GEO.fenceRail, MAT.fence, side * (edge + 1.3), 0.38, z, { cast: true });
+      addMesh(parent, GEO.fencePost, MAT.fence, side * (edge + 1.3), 0.25, z + 0.5, { cast: true });
+
+      // "Chicken crossing" sign at the start of a crossing
+      if (isCrossing) {
+        const sx = side * (edge + 0.7);
+        addMesh(parent, GEO.signPost, MAT.post, sx, 0.45, z + 0.4);
+        addMesh(parent, GEO.sign, signMat, sx, 1.05, z + 0.43);
+      }
+
+      // A barn now and then, otherwise trees/bushes/hay
+      if (Math.random() < 0.035) {
+        addBarn(parent, side, z);
+        return;
+      }
+      const items = Math.random() < 0.7 ? 1 + Math.floor(Math.random() * 2) : 0;
+      for (let i = 0; i < items; i++) {
+        const x = side * (edge + 2.2 + Math.random() * 7.5);
+        const r = Math.random();
+        if (r < 0.65)      addTree(parent, x, z + (Math.random() - 0.5) * 0.6);
+        else if (r < 0.85) addMesh(parent, GEO.bush, MAT.bush, x, 0.2, z, { cast: true });
+        else {
+          const hay = addMesh(parent, GEO.hay, MAT.hay, x, 0.4, z, { cast: true });
+          hay.rotation.z = Math.PI / 2;
+          hay.rotation.y = Math.random() * Math.PI;
+        }
+      }
     }
 
     // -------------------------------------------------------------------------
@@ -397,32 +846,31 @@
         this.frontierIndex = 0;
         this._scene        = null;
         this._score        = 0;
+        this.time          = 0;
+        this.keepAhead     = 24;  // rows kept generated in front of the player; set from the camera
       }
 
       init(scene, score = 0) {
         this._scene = scene;
         this._score = score;
-
-        // 5 grass rows behind start, 12 ahead
-        for (let i = -5; i <= 12; i++) {
-          this._addRow(i);
-        }
-        this.frontierIndex = 12;
+        // Safe rows behind the start (visible at the bottom of the screen), plenty ahead
+        this.frontierIndex = -CULL_BEHIND - 1;
+        this.generateAheadIfNeeded(0);
       }
 
-      update(dt, playerRowIndex, gameState, score) {
+      update(dt, playerRowIndex, score) {
         this._score = score;
+        this.time += dt;
+        const half = WALK_SPAN / 2;
 
-        if (gameState !== 'gameover') {
-          const halfWorld = ROAD_WIDTH / 2;
-          for (const row of this.rows.values()) {
-            for (const obs of row.obstacles) {
-              obs.x += obs.speed * obs.direction * dt;
-              // Wrap at road edges
-              if (obs.x >  halfWorld + obs.width / 2) obs.x -= ROAD_WIDTH + obs.width;
-              if (obs.x < -halfWorld - obs.width / 2) obs.x += ROAD_WIDTH + obs.width;
-              obs.mesh.position.x = obs.x;
-            }
+        for (const row of this.rows.values()) {
+          for (const obs of row.obstacles) {
+            if (obs.dead) continue;
+            obs.x += obs.speed * obs.direction * dt;
+            if (obs.x >  half + obs.width / 2) obs.x -= WALK_SPAN + obs.width;
+            if (obs.x < -half - obs.width / 2) obs.x += WALK_SPAN + obs.width;
+            obs.mesh.position.x = obs.x;
+            animateBirds(obs.birds, this.time, obs.speed);
           }
         }
 
@@ -431,19 +879,16 @@
       }
 
       generateAheadIfNeeded(playerRowIndex) {
-        const bufferAhead = this.frontierIndex - playerRowIndex;
-        if (bufferAhead <= BUFFER_TRIGGER) {
-          for (let i = 0; i < GENERATE_AHEAD; i++) {
-            this.frontierIndex++;
-            this._addRow(this.frontierIndex);
-          }
+        while (this.frontierIndex < playerRowIndex + this.keepAhead) {
+          this.frontierIndex++;
+          this._addRow(this.frontierIndex);
         }
       }
 
       cullBehind(playerRowIndex) {
         for (const [index, row] of this.rows) {
           if (index < playerRowIndex - CULL_BEHIND) {
-            row.dispose();
+            this._scene.remove(row.group);
             this.rows.delete(index);
           }
         }
@@ -454,18 +899,15 @@
       }
 
       reset(score = 0) {
-        for (const row of this.rows.values()) {
-          row.dispose();
-        }
+        for (const row of this.rows.values()) this._scene.remove(row.group);
         this.rows.clear();
-        this.frontierIndex = 0;
         this.init(this._scene, score);
       }
 
       _addRow(rowIndex) {
         let config;
         if (rowIndex <= 3) {
-          config = { type: 'grass', index: rowIndex, obstacles: [] };
+          config = { type: 'road', index: rowIndex, obstacles: [] };
         } else {
           const previousRows = [];
           for (let idx = rowIndex - 1; idx >= rowIndex - 10 && this.rows.has(idx); idx--) {
@@ -474,339 +916,453 @@
           config = generateRow(rowIndex, previousRows, this._score);
         }
 
-        const scene = this._scene;
-        const disposables = [];
+        // Everything in a row hangs off one group, so removing a row is one call.
+        // Geometries/materials are shared, so there's nothing to dispose.
+        const group = new THREE.Group();
+        const z = -rowIndex * ROW_DEPTH;
 
-        // --- Terrain plane ---
-        const terrainColor = config.type === 'road'  ? COLOR_ROAD
-                           : config.type === 'truck' ? COLOR_TRUCK_ROAD
-                           : COLOR_GRASS;
-        const terrainGeo = new THREE.PlaneGeometry(ROAD_WIDTH, ROW_DEPTH);
-        const terrainMat = new THREE.MeshBasicMaterial({ color: terrainColor });
-        const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
-        terrainMesh.rotation.x = -Math.PI / 2;
-        terrainMesh.position.set(0, 0, -rowIndex * ROW_DEPTH);
-        scene.add(terrainMesh);
-        disposables.push({ mesh: terrainMesh, geo: terrainGeo, mat: terrainMat });
+        const surface = new THREE.Mesh(GEO.rowPlane, config.type === 'road' ? roadMat : crossingMat);
+        surface.rotation.x = -Math.PI / 2;
+        surface.position.set(0, 0, z);
+        surface.receiveShadow = true;
+        group.add(surface);
 
-        // --- Lane markings for road/truck rows ---
-        if (config.type === 'road' || config.type === 'truck') {
-          for (const lx of [-2.5, 0, 2.5]) {
-            const lineGeo = new THREE.PlaneGeometry(0.06, ROW_DEPTH * 0.7);
-            const lineMat = new THREE.MeshBasicMaterial({ color: COLOR_ROAD_LINE });
-            const lineMesh = new THREE.Mesh(lineGeo, lineMat);
-            lineMesh.rotation.x = -Math.PI / 2;
-            lineMesh.position.set(lx, 0.002, -rowIndex * ROW_DEPTH);
-            scene.add(lineMesh);
-            disposables.push({ mesh: lineMesh, geo: lineGeo, mat: lineMat });
-          }
-        }
+        const prev = this.rows.get(rowIndex - 1);
+        const crossingStarts = isHazard(config.type) && !(prev && isHazard(prev.type));
+        decorateVerge(group, -1, z, rowIndex, crossingStarts);
+        decorateVerge(group,  1, z, rowIndex, false);
 
-        // --- Decorative tree stumps for grass rows ---
-        if (config.type === 'grass') {
-          const stumpCount = 2 + Math.floor(Math.random() * 2); // 2–3
-          const usedX = [];
-          for (let s = 0; s < stumpCount; s++) {
-            let sx;
-            let tries = 0;
-            do {
-              sx = (Math.random() - 0.5) * (ROAD_WIDTH - 1.5);
-              tries++;
-            } while (usedX.some(ox => Math.abs(ox - sx) < 1.2) && tries < 20);
-            usedX.push(sx);
-
-            const stumpGeo = new THREE.CylinderGeometry(0.15, 0.2, 0.4, 6);
-            const stumpMat = new THREE.MeshBasicMaterial({ color: 0x226622 });
-            const stumpMesh = new THREE.Mesh(stumpGeo, stumpMat);
-            stumpMesh.position.set(sx, 0.2, -rowIndex * ROW_DEPTH);
-            scene.add(stumpMesh);
-            disposables.push({ mesh: stumpMesh, geo: stumpGeo, mat: stumpMat });
-          }
-        }
-
-        // --- Obstacle meshes ---
         const obstacles = [];
-        for (const obsConfig of config.obstacles) {
-          const bodyColor = obsConfig.type === 'car'   ? COLOR_CAR   : COLOR_TRUCK;
-          const cabColor  = obsConfig.type === 'car'   ? 0xcc2222    : 0xcc6600;
-          const group = buildVehicleMesh(obsConfig.width, obsConfig.height, obsConfig.depth, bodyColor, cabColor);
-          group.position.set(obsConfig.x, 0, -obsConfig.row * ROW_DEPTH);
-          scene.add(group);
-
-          obstacles.push({
-            type:      obsConfig.type,
-            row:       rowIndex,
-            x:         obsConfig.x,
-            width:     obsConfig.width,
-            depth:     obsConfig.depth,
-            height:    obsConfig.height,
-            speed:     obsConfig.speed,
-            direction: obsConfig.direction,
-            mesh:      group
-          });
+        for (const o of config.obstacles) {
+          const { group: mesh, birds } = buildHazardMesh(config.type);
+          mesh.position.set(o.x, 0, z);
+          if (o.direction < 0) mesh.rotation.y = Math.PI;  // face the way they walk
+          group.add(mesh);
+          obstacles.push({ ...o, row: rowIndex, mesh, birds, dead: false });
         }
 
-        const row = {
-          type:      config.type,
-          index:     rowIndex,
-          obstacles,
-          dispose() {
-            for (const d of disposables) {
-              scene.remove(d.mesh);
-              d.geo.dispose();
-              d.mat.dispose();
-            }
-            for (const obs of obstacles) {
-              scene.remove(obs.mesh);
-              obs.mesh.traverse(child => {
-                if (child.isMesh) {
-                  child.geometry.dispose();
-                  child.material.dispose();
-                }
-              });
-            }
-          }
-        };
-
-        this.rows.set(rowIndex, row);
+        this._scene.add(group);
+        this.rows.set(rowIndex, { type: config.type, index: rowIndex, obstacles, group });
       }
     }
 
     // -------------------------------------------------------------------------
-    // Player
+    // Player car (faces -z, i.e. up the road)
     // -------------------------------------------------------------------------
     function buildPlayerMesh(scene) {
       const group = new THREE.Group();
+      const car = new THREE.Group();  // tilted/spun separately from the position group
+      group.add(car);
 
-      // Body
-      const bodyGeo = new THREE.BoxGeometry(0.7, 0.25, 1.1);
-      const bodyMat = new THREE.MeshBasicMaterial({ color: COLOR_PLAYER });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.position.y = 0.125; // half body height
-      group.add(body);
+      const add = (geo, mat, x, y, z, sx = 1, sy = 1, sz = 1) => {
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(x, y, z);
+        m.scale.set(sx, sy, sz);
+        m.castShadow = true;
+        car.add(m);
+        return m;
+      };
 
-      // Cab (slightly darker yellow, on top toward rear)
-      const cabGeo = new THREE.BoxGeometry(0.5, 0.2, 0.55);
-      const cabMat = new THREE.MeshBasicMaterial({ color: 0xddbb00 });
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.set(0, 0.25 + 0.1, 0.15); // on top, rear-biased
-      group.add(cab);
+      add(GEO.unit, MAT.carBody,   0, 0.2, 0,      0.72, 0.22, 1.15);  // chassis
+      add(GEO.unit, MAT.carBody,   0, 0.36, 0.08,  0.6, 0.12, 0.9);    // shoulders
+      add(GEO.unit, MAT.carGlass,  0, 0.46, 0.12,  0.5, 0.16, 0.5);    // cabin glass
+      add(GEO.unit, MAT.carBody,   0, 0.55, 0.14,  0.46, 0.03, 0.4);   // roof
+      add(GEO.unit, MAT.carStripe, -0.09, 0.315, -0.3, 0.07, 0.01, 0.55); // racing stripes
+      add(GEO.unit, MAT.carStripe,  0.09, 0.315, -0.3, 0.07, 0.01, 0.55);
+      add(GEO.unit, MAT.carBody,   0, 0.42, 0.55,  0.7, 0.04, 0.14);   // spoiler
+      add(GEO.unit, MAT.tire,     -0.26, 0.37, 0.55, 0.04, 0.1, 0.06);
+      add(GEO.unit, MAT.tire,      0.26, 0.37, 0.55, 0.04, 0.1, 0.06);
+      add(GEO.unit, MAT.headlight, -0.22, 0.24, -0.58, 0.16, 0.07, 0.02);
+      add(GEO.unit, MAT.headlight,  0.22, 0.24, -0.58, 0.16, 0.07, 0.02);
+      add(GEO.unit, MAT.taillight, -0.24, 0.26, 0.58, 0.16, 0.06, 0.02);
+      add(GEO.unit, MAT.taillight,  0.24, 0.26, 0.58, 0.16, 0.06, 0.02);
+
+      const wheelGeo = new THREE.CylinderGeometry(0.13, 0.13, 0.12, 12);
+      wheelGeo.rotateZ(Math.PI / 2);
+      const wheels = [];
+      for (const [x, z] of [[-0.37, -0.36], [0.37, -0.36], [-0.37, 0.36], [0.37, 0.36]]) {
+        const w = add(wheelGeo, MAT.tire, x, 0.13, z);
+        const hub = new THREE.Mesh(GEO.unit, MAT.hub);
+        hub.scale.set(0.125, 0.09, 0.09);
+        w.add(hub);
+        wheels.push(w);
+      }
 
       scene.add(group);
-      return group;
+      return { group, car, wheels };
     }
 
     class Player {
       constructor(scene) {
-        this._scene = scene;
-        this.mesh   = buildPlayerMesh(scene);
+        const built = buildPlayerMesh(scene);
+        this.mesh   = built.group;
+        this.car    = built.car;
+        this.wheels = built.wheels;
         this.state  = this._defaultState();
         this._applyMeshPosition();
       }
 
       _defaultState() {
-        return {
-          worldX:  0,
-          worldZ:  START_Z,
-          velX:    0,
-          velZ:    0,
-          isAlive: true
-        };
+        return { worldX: 0, worldZ: START_Z, velX: 0, velZ: 0, isAlive: true, spin: 0 };
       }
 
-      update(dt, keys, cameraRearZ, world) {
+      update(dt, keys, rearLimitZ, world) {
         const s = this.state;
         if (!s.isAlive) return;
 
-        // Forward / backward
-        const wantForward  = keys.has('ArrowUp')    || keys.has('w') || keys.has('W');
-        const wantBackward = keys.has('ArrowDown')  || keys.has('s') || keys.has('S');
-        const wantLeft     = keys.has('ArrowLeft')  || keys.has('a') || keys.has('A');
-        const wantRight    = keys.has('ArrowRight') || keys.has('d') || keys.has('D');
+        const wantForward  = keys.has('ArrowUp')    || keys.has('w');
+        const wantBackward = keys.has('ArrowDown')  || keys.has('s');
+        const wantLeft     = keys.has('ArrowLeft')  || keys.has('a');
+        const wantRight    = keys.has('ArrowRight') || keys.has('d');
+        const accel = Math.min(1, ACCEL * dt);
+        const fric  = Math.max(0, 1 - FRICTION * dt);
 
-        if (wantForward) {
-          s.velZ += (-PLAYER_SPEED - s.velZ) * Math.min(1, ACCEL * dt);
-        } else if (wantBackward) {
-          s.velZ += (PLAYER_SPEED - s.velZ) * Math.min(1, ACCEL * dt);
-        } else {
-          s.velZ *= Math.max(0, 1 - FRICTION * dt);
-        }
+        if (wantForward)       s.velZ += (-PLAYER_SPEED - s.velZ) * accel;
+        else if (wantBackward) s.velZ += ( PLAYER_SPEED - s.velZ) * accel;
+        else                   s.velZ *= fric;
 
-        if (wantLeft) {
-          s.velX += (-PLAYER_LATERAL - s.velX) * Math.min(1, ACCEL * dt);
-        } else if (wantRight) {
-          s.velX += (PLAYER_LATERAL - s.velX) * Math.min(1, ACCEL * dt);
-        } else {
-          s.velX *= Math.max(0, 1 - FRICTION * dt);
-        }
+        if (wantLeft)          s.velX += (-PLAYER_LATERAL - s.velX) * accel;
+        else if (wantRight)    s.velX += ( PLAYER_LATERAL - s.velX) * accel;
+        else                   s.velX *= fric;
 
         s.worldX += s.velX * dt;
         s.worldZ += s.velZ * dt;
 
-        // Clamp X to road edges
-        const halfRoad = ROAD_WIDTH / 2 - 0.4;
-        s.worldX = Math.max(-halfRoad, Math.min(halfRoad, s.worldX));
+        // Clamp X to the road
+        const halfRoad = ROAD_WIDTH / 2 - 0.45;
+        if (Math.abs(s.worldX) > halfRoad) {
+          s.worldX = Math.sign(s.worldX) * halfRoad;
+          s.velX = 0;
+        }
 
-        // Clamp Z so player can't fall off the back of screen
-        if (s.worldZ > cameraRearZ + 0.5) {
-          s.worldZ = cameraRearZ + 0.5;
+        // Can't reverse off the bottom of the screen
+        if (s.worldZ > rearLimitZ) {
+          s.worldZ = rearLimitZ;
           if (s.velZ > 0) s.velZ = 0;
         }
 
-        // Grass snap: when on a grass row and no forward/backward key held,
-        // gently pull the car to the centre of that row and kill Z velocity.
-        // This gives a natural "pause and align" feel on safe ground.
-        if (world && !wantForward && !wantBackward) {
+        // Safe-row snap: on a plain road row with no forward/back key held,
+        // ease the car to the row centre so it parks clear of the crossings.
+        if (!wantForward && !wantBackward) {
           const rowIndex = Math.round(-s.worldZ / ROW_DEPTH);
           const row = world.getRow(rowIndex);
-          if (row && row.type === 'grass') {
+          if (row && row.type === 'road') {
             const rowCentreZ = -rowIndex * ROW_DEPTH;
-            // Ease toward row centre (strong spring, feels snappy)
             s.worldZ += (rowCentreZ - s.worldZ) * Math.min(1, 12 * dt);
-            // Kill residual Z velocity so the car stops cleanly
             s.velZ *= Math.max(0, 1 - 15 * dt);
           }
         }
 
+        // Visual feel: steer into turns, lean a little, spin the wheels
+        this.car.rotation.y = -s.velX * 0.06;
+        this.car.rotation.z = -s.velX * 0.012;
+        this.car.rotation.x = s.velZ * 0.006;
+        for (const w of this.wheels) w.rotation.x += s.velZ * dt / 0.13;
+
+        this._applyMeshPosition();
+      }
+
+      // Crash: skid and spin out
+      updateCrash(dt) {
+        const s = this.state;
+        s.velX *= Math.max(0, 1 - 4 * dt);
+        s.velZ *= Math.max(0, 1 - 4 * dt);
+        s.worldX += s.velX * dt;
+        s.worldZ += s.velZ * dt;
+        s.spin *= Math.max(0, 1 - 3 * dt);
+        this.car.rotation.y += s.spin * dt;
         this._applyMeshPosition();
       }
 
       reset() {
         this.state = this._defaultState();
+        this.car.rotation.set(0, 0, 0);
         this._applyMeshPosition();
       }
 
       _applyMeshPosition() {
-        this.mesh.position.set(this.state.worldX, 0.125, this.state.worldZ);
+        this.mesh.position.set(this.state.worldX, 0, this.state.worldZ);
       }
     }
 
     // -------------------------------------------------------------------------
-    // Collision detection
+    // Collision detection (car AABB vs bird AABB)
     // -------------------------------------------------------------------------
     function checkCollision(playerState, world, playerRowIndex) {
       const px  = playerState.worldX;
       const pz  = playerState.worldZ;
-      const phx = 0.32;
-      const phz = 0.50;
+      const phx = 0.34;
+      const phz = 0.54;
 
       for (let ri = playerRowIndex - 1; ri <= playerRowIndex + 1; ri++) {
         const row = world.getRow(ri);
         if (!row) continue;
         for (const obs of row.obstacles) {
+          if (obs.dead) continue;
           const oz  = -obs.row * ROW_DEPTH;
           const ohx = obs.width / 2 - 0.05;
-          const ohz = obs.depth / 2 - 0.05;
-          if (Math.abs(px - obs.x) < phx + ohx &&
-              Math.abs(pz - oz)    < phz + ohz) {
-            return 'hit';
+          const ohz = obs.depth / 2;
+          if (Math.abs(px - obs.x) < phx + ohx && Math.abs(pz - oz) < phz + ohz) {
+            return obs;
+          }
+        }
+      }
+      return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Crash effects: feather burst + the bird that got bonked flying off
+    // -------------------------------------------------------------------------
+    class Effects {
+      constructor(scene) {
+        this.scene = scene;
+        this.feathers = [];
+        for (let i = 0; i < 40; i++) {
+          const m = new THREE.Mesh(GEO.feather, MAT.feather);
+          m.visible = false;
+          scene.add(m);
+          this.feathers.push({ mesh: m, vel: new THREE.Vector3(), spin: new THREE.Vector3(), life: 0 });
+        }
+        this.flyer = null;
+      }
+
+      burst(pos, obs) {
+        for (const f of this.feathers) {
+          f.mesh.position.set(pos.x, 0.5, pos.z);
+          f.mesh.visible = true;
+          f.mesh.scale.setScalar(1);
+          f.vel.set((Math.random() - 0.5) * 6, 2 + Math.random() * 4, (Math.random() - 0.5) * 6);
+          f.spin.set(Math.random() * 10, Math.random() * 10, Math.random() * 10);
+          f.life = 1.2 + Math.random() * 0.6;
+        }
+        if (obs) {
+          obs.dead = true;
+          this.flyer = { mesh: obs.mesh, vy: 7, vx: (Math.random() - 0.5) * 4, life: 1.5 };
+        }
+      }
+
+      update(dt) {
+        for (const f of this.feathers) {
+          if (f.life <= 0) continue;
+          f.life -= dt;
+          f.vel.y -= 6 * dt;
+          f.vel.multiplyScalar(Math.max(0, 1 - 1.8 * dt));  // air drag: feathers float down
+          f.mesh.position.addScaledVector(f.vel, dt);
+          f.mesh.position.y = Math.max(0.03, f.mesh.position.y);
+          f.mesh.rotation.x += f.spin.x * dt;
+          f.mesh.rotation.y += f.spin.y * dt;
+          f.mesh.rotation.z += f.spin.z * dt;
+          f.mesh.scale.setScalar(Math.min(1, f.life * 2));
+          if (f.life <= 0) f.mesh.visible = false;
+        }
+        if (this.flyer) {
+          const fl = this.flyer;
+          fl.life -= dt;
+          fl.vy -= 18 * dt;
+          fl.mesh.position.y += fl.vy * dt;
+          fl.mesh.position.x += fl.vx * dt;
+          fl.mesh.rotation.z += 9 * dt;
+          if (fl.life <= 0) {
+            fl.mesh.visible = false;
+            this.flyer = null;
           }
         }
       }
 
-      return 'none';
+      clear() {
+        for (const f of this.feathers) { f.life = 0; f.mesh.visible = false; }
+        this.flyer = null;
+      }
     }
 
     // -------------------------------------------------------------------------
-    // HUD helpers
+    // HUD + screens
     // -------------------------------------------------------------------------
-    const _scoreEl      = document.getElementById('hud-score');
-    const _overlayEl    = document.getElementById('overlay');
-    const _overlayScore = document.getElementById('overlay-score');
+    const $ = id => document.getElementById(id);
+    const ui = {
+      score:   $('hud-score'),
+      best:    $('hud-best'),
+      hint:    $('hud-hint'),
+      title:   $('title-screen'),
+      titleBest: $('title-best'),
+      over:    $('over-screen'),
+      overScore: $('over-score'),
+      overBest:  $('over-best'),
+      newBest:   $('over-new-best'),
+      touch:   $('touch'),
+    };
 
+    function loadBest() {
+      try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch { return 0; }
+    }
+    function saveBest(n) {
+      try { localStorage.setItem(BEST_KEY, String(n)); } catch { /* storage blocked: best lasts this visit */ }
+    }
+
+    let best = loadBest();
+    ui.best.textContent = 'BEST ' + best;
+    ui.titleBest.textContent = best;
+
+    let shownScore = -1;
     function updateScoreDisplay(n) {
-      _scoreEl.textContent = 'Score: ' + n;
-    }
-
-    function showGameOver(n) {
-      _overlayScore.textContent = 'Score: ' + n;
-      _overlayEl.classList.add('visible');
-    }
-
-    function hideGameOver() {
-      _overlayEl.classList.remove('visible');
+      if (n === shownScore) return;  // avoid touching the DOM every frame
+      shownScore = n;
+      ui.score.textContent = n;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input — keyboard + on-screen touch pads feed the same key set
     // -------------------------------------------------------------------------
     const keys = new Set();
-    const TRACKED_KEYS = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','W','s','S','a','A','d','D'];
+    const KEY_MAP = {
+      ArrowUp: 'ArrowUp', ArrowDown: 'ArrowDown', ArrowLeft: 'ArrowLeft', ArrowRight: 'ArrowRight',
+      w: 'w', W: 'w', s: 's', S: 's', a: 'a', A: 'a', d: 'd', D: 'd',
+    };
 
     window.addEventListener('keydown', e => {
-      if (TRACKED_KEYS.includes(e.key)) {
+      const k = KEY_MAP[e.key];
+      if (k) {
         e.preventDefault();
-        keys.add(e.key);
+        keys.add(k);
+        if (gameState === 'ready' && (k === 'ArrowUp' || k === 'w')) startGame();
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+        if (gameState === 'ready') { e.preventDefault(); startGame(); }
+        else if (gameState === 'gameover') { e.preventDefault(); restartGame(); }
       }
     });
     window.addEventListener('keyup', e => {
-      keys.delete(e.key);
+      const k = KEY_MAP[e.key];
+      if (k) keys.delete(k);
     });
+    // Releasing keys while the tab is hidden never fires keyup — don't leave the car driving.
+    window.addEventListener('blur', () => keys.clear());
+    document.addEventListener('visibilitychange', () => keys.clear());
+
+    for (const btn of ui.touch.querySelectorAll('button')) {
+      const k = btn.dataset.key;
+      const press = e => {
+        e.preventDefault();
+        btn.setPointerCapture?.(e.pointerId);
+        keys.add(k);
+        btn.classList.add('held');
+      };
+      const release = () => {
+        keys.delete(k);
+        btn.classList.remove('held');
+      };
+      btn.addEventListener('pointerdown', press);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointercancel', release);
+      btn.addEventListener('lostpointercapture', release);
+      btn.addEventListener('contextmenu', e => e.preventDefault());
+    }
 
     // -------------------------------------------------------------------------
     // Bootstrap
     // -------------------------------------------------------------------------
-    const canvas   = document.getElementById('game-canvas');
     const renderer = new Renderer();
-    const scene    = renderer.init(canvas);
+    const scene    = renderer.init($('game-canvas'));
 
-    let gameState = 'playing';
-    let score     = 0;
+    // 'ready' (title) → 'playing' → 'crashed' (short animation) → 'gameover'
+    let gameState  = 'ready';
+    let score      = 0;
+    let crashTimer = 0;
 
-    const world  = new World();
+    const world   = new World();
+    world.keepAhead = renderer.rowsVisibleAhead;
+    renderer.onResize = () => { world.keepAhead = renderer.rowsVisibleAhead; };
     world.init(scene, score);
-
-    const player = new Player(scene);
-
-    // Snap camera instantly to spawn position so there's no lerp drift on frame 1
+    const player  = new Player(scene);
+    const effects = new Effects(scene);
     renderer.snapTo(player.mesh.position);
 
-    function triggerGameOver() {
-      gameState = 'gameover';
-      showGameOver(score);
+    function startGame() {
+      if (gameState !== 'ready') return;
+      ui.title.classList.remove('visible');
+      ui.touch.classList.add('active');
+      gameState = 'playing';
     }
 
-    document.getElementById('btn-restart').addEventListener('click', () => {
+    function restartGame() {
+      if (gameState !== 'gameover') return;
       keys.clear();
       player.reset();
       world.reset(0);
+      effects.clear();
       score = 0;
       updateScoreDisplay(0);
-      hideGameOver();
-      renderer.snapTo(player.mesh.position);  // snap camera back to spawn
+      ui.over.classList.remove('visible');
+      ui.touch.classList.add('active');
+      ui.hint.style.opacity = '1';
+      renderer.snapTo(player.mesh.position);
       gameState = 'playing';
-    });
+    }
+
+    function crash(obs) {
+      gameState = 'crashed';
+      crashTimer = 0.9;
+      player.state.isAlive = false;
+      player.state.spin = (Math.random() < 0.5 ? -1 : 1) * 14;
+      effects.burst(player.mesh.position, obs);
+      renderer.shake = 1;
+      keys.clear();
+    }
+
+    function showGameOver() {
+      gameState = 'gameover';
+      const isNewBest = score > best;
+      if (isNewBest) {
+        best = score;
+        saveBest(best);
+        ui.best.textContent = 'BEST ' + best;
+      }
+      ui.overScore.textContent = score;
+      ui.overBest.textContent = best;
+      ui.newBest.hidden = !isNewBest;
+      ui.touch.classList.remove('active');
+      ui.over.classList.add('visible');
+      $('btn-restart').focus({ preventScroll: true });
+    }
+
+    $('btn-start').addEventListener('click', startGame);
+    $('btn-restart').addEventListener('click', restartGame);
 
     // -------------------------------------------------------------------------
     // Game loop
     // -------------------------------------------------------------------------
-    let lastTime = 0;
+    let lastTime = performance.now();
 
     function tick(timestamp) {
+      // Clamp dt so a tab switch or slow frame can't teleport anything
       const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
       lastTime = timestamp;
 
+      const playerRowIndex = Math.floor(-player.state.worldZ / ROW_DEPTH);
+
       if (gameState === 'playing') {
-        const cameraRearZ = renderer.camera.position.z - renderer.CAMERA_OFFSET.z + 2;
-        player.update(dt, keys, cameraRearZ, world);
+        player.update(dt, keys, -score + MAX_REVERSE, world);
 
-        const playerRowIndex = Math.floor(-player.state.worldZ / ROW_DEPTH);
-        world.update(dt, playerRowIndex, gameState, score);
+        const hit = checkCollision(player.state, world, Math.floor(-player.state.worldZ / ROW_DEPTH));
+        if (hit) crash(hit);
 
-        const hit = checkCollision(player.state, world, playerRowIndex);
-        if (hit !== 'none') triggerGameOver();
-
-        score = Math.max(0, Math.floor(-player.state.worldZ));
+        score = Math.max(score, Math.floor(-player.state.worldZ));
         updateScoreDisplay(score);
+        if (score > 2) ui.hint.style.opacity = '0';
+      } else if (gameState === 'crashed') {
+        player.updateCrash(dt);
+        crashTimer -= dt;
+        if (crashTimer <= 0) showGameOver();
       }
 
-      renderer.update(player.mesh.position);
+      world.update(dt, playerRowIndex, score);
+      effects.update(dt);
+      renderer.update(player.mesh.position, dt);
       renderer.render();
       requestAnimationFrame(tick);
     }
 
     requestAnimationFrame(tick);
-
   </script>
 </body>
 </html>
