@@ -44,6 +44,7 @@
     <ul class="nav-links" id="navMenu">
       <li><a href="#about"    class="nav-btn">[ ABOUT ]</a></li>
       <li><a href="#projects" class="nav-btn">[ PROJECTS ]</a></li>
+      <li><a href="#book"     class="nav-btn">[ BOOK ]</a></li>
       <li><a href="#contact"  class="nav-btn">[ CONTACT ]</a></li>
     </ul>
     <div class="nav-score">SCORE: <span id="score">000000</span></div>
@@ -293,10 +294,135 @@
     </div>
   </section>
 
+  <!-- ── CATALYST LOG (special situations book) ──
+       Public record of the event-driven sleeve. Mirrors the private
+       trade-log artifact; update status/prices here when a name is
+       opened or closed. Closed trades keep their card with the result. -->
+  <section id="book">
+    <div class="section-header">
+      <span class="section-num">03 //</span>
+      <h2 class="section-title">CATALYST.LOG</h2>
+      <span class="scroll-hint-inline">◀ SCROLL ▶</span>
+    </div>
+
+    <div class="book-intro">
+      <p>
+        My special situations book: mergers, tender offers, spinoffs and post-bankruptcy equities,
+        where a dated event can close the gap between price and value. Every name gets a written
+        thesis, a catalyst and an exit condition before any money goes in, and every closed trade
+        gets a lessons note, win or lose.
+      </p>
+      <div class="book-stats">
+        <span>OPEN <b>0</b></span><span>WATCHING <b>5</b></span><span>CLOSED <b>0</b></span><span>UPDATED <b>2026-10-28</b></span>
+      </div>
+    </div>
+
+    <div class="projects-grid">
+
+      <article class="project-card book-card pixel-border">
+        <div class="project-top">
+          <span class="book-ticker">UNF</span>
+          <span class="project-tag">MERGER ARB</span>
+        </div>
+        <h3 class="project-name">UNIFIRST / CINTAS</h3>
+        <p class="project-desc">
+          $155 cash + 0.772 CTAS (~$318). At $252 the 26% spread implies roughly 25&ndash;50% odds
+          the deal survives the FTC. Cintas isn't required to accept remedies, and a $350M reverse
+          fee is owed if antitrust blocks it. A real binary, but I have no edge on the antitrust case.
+        </p>
+        <dl class="book-meta">
+          <dt>CATALYST</dt><dd>FTC decision; no close before Dec 11, 2026</dd>
+          <dt>EXIT IF</dt><dd>FTC sues and Cintas won't litigate</dd>
+          <dt>CALL</dt><dd>Paper trade only</dd>
+        </dl>
+        <div class="project-tech"><span class="book-status">WATCH @ $252.25</span></div>
+      </article>
+
+      <article class="project-card book-card pixel-border">
+        <div class="project-top">
+          <span class="book-ticker">LNTH</span>
+          <span class="project-tag">MERGER ARB</span>
+        </div>
+        <h3 class="project-name">LANTHEUS / CURIUM</h3>
+        <p class="project-desc">
+          $102.50 cash plus a CVR worth up to $12. The FTC issued a Second Request on 10/21. At $100.04
+          the cash spread is ~2.5% (about 4% a year) against ~15% downside if the deal breaks, so I see
+          it as fairly priced.
+        </p>
+        <dl class="book-meta">
+          <dt>CATALYST</dt><dd>FTC review; outside date May 2, 2027</dd>
+          <dt>EXIT IF</dt><dd>FTC moves to sue with no remedy, or UK CMA opens Phase 2</dd>
+          <dt>CALL</dt><dd>Buy at &le;$97 or once a remedy is agreed</dd>
+        </dl>
+        <div class="project-tech"><span class="book-status">WATCH @ $100.04</span></div>
+      </article>
+
+      <article class="project-card book-card pixel-border">
+        <div class="project-top">
+          <span class="book-ticker">INVE</span>
+          <span class="project-tag">TENDER</span>
+        </div>
+        <h3 class="project-name">INVE TECHNOLOGIES</h3>
+        <p class="project-desc">
+          Sold its operating business and now holds ~$87M of cash plus private Trackonomy preferred.
+          The $20M tender has no odd-lot priority, so the tender arb is worth only ~2%. The real thesis
+          is the discount to cash, and that depends on management not burning it.
+        </p>
+        <dl class="book-meta">
+          <dt>CATALYST</dt><dd>Q3 10-Q ~Nov 12; tender result Nov 19</dd>
+          <dt>EXIT IF</dt><dd>Cash comes in short, or an expensive acquisition</dd>
+          <dt>CALL</dt><dd>Wait for the 10-Q numbers</dd>
+        </dl>
+        <div class="project-tech"><span class="book-status">WATCH @ $2.69</span></div>
+      </article>
+
+      <article class="project-card book-card pixel-border">
+        <div class="project-top">
+          <span class="book-ticker">MSGR</span>
+          <span class="project-tag">SPINOFF</span>
+        </div>
+        <h3 class="project-name">MSG RANGERS</h3>
+        <p class="project-desc">
+          The NY Rangers, spun out of MSG Sports on 10/26. ~$2.5B enterprise value against
+          $3.6&ndash;3.8B published team valuations. But index funds are buying rather than
+          dumping it, and the discount looks structural (Dolan family control, NHL consent rules).
+        </p>
+        <dl class="book-meta">
+          <dt>CATALYST</dt><dd>None scheduled (stake sale, buyback, approach)</dd>
+          <dt>EXIT IF</dt><dd>No catalyst within ~6 months</dd>
+          <dt>CALL</dt><dd>Wait for a catalyst or a sharp drop</dd>
+        </dl>
+        <div class="project-tech"><span class="book-status">WATCH @ $189.20</span></div>
+      </article>
+
+      <article class="project-card book-card pixel-border">
+        <div class="project-top">
+          <span class="book-ticker">OPI</span>
+          <span class="project-tag">POST-REORG</span>
+        </div>
+        <h3 class="project-name">OFFICE PROPERTIES</h3>
+        <p class="project-desc">
+          Office REIT that came out of Chapter 11 in June. The equity is a thin stub on $1.7B of
+          secured debt: the plan's midpoint value is ~$24/share against $13.31, but a 10% lower
+          enterprise value would leave ~$5. Occupancy is 78% and still falling.
+        </p>
+        <dl class="book-meta">
+          <dt>CATALYST</dt><dd>Q3 results, early November</dd>
+          <dt>EXIT IF</dt><dd>Occupancy falls again, or assets sell below book</dd>
+          <dt>CALL</dt><dd>Small option-like stake only after Q3</dd>
+        </dl>
+        <div class="project-tech"><span class="book-status">WATCH @ $13.31</span></div>
+      </article>
+
+    </div>
+
+    <p class="book-note">Personal research log. Not investment advice.</p>
+  </section>
+
   <!-- ── CONTACT ── -->
   <section id="contact">
     <div class="section-header">
-      <span class="section-num">03 //</span>
+      <span class="section-num">04 //</span>
       <h2 class="section-title">CONTACT.SYS</h2>
     </div>
 

@@ -604,6 +604,78 @@ section {
 }
 
 /* ═══════════════════════════════════════════════
+   CATALYST LOG (special situations book)
+   Reuses the project scroller/cards; adds stats + thesis rows
+   ═══════════════════════════════════════════════ */
+#book {
+  padding: 100px 2rem 80px;
+}
+
+.book-intro {
+  max-width: 760px;
+  margin-bottom: 1.8rem;
+  font-size: 1.1rem;
+  color: var(--fg);
+}
+
+.book-intro p {
+  opacity: 0.85;
+}
+
+.book-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.4rem;
+  margin-top: 1rem;
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  color: var(--cyan);
+}
+
+.book-stats b {
+  color: var(--yellow);
+  font-weight: normal;
+}
+
+.book-ticker {
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  color: var(--green);
+  text-shadow: 0 0 6px var(--green);
+}
+
+.book-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.8rem;
+  font-size: 0.95rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.8rem;
+}
+
+.book-meta dt {
+  font-family: var(--font-pixel);
+  font-size: 0.35rem;
+  color: var(--yellow);
+  padding-top: 0.3rem;
+}
+
+.book-meta dd {
+  opacity: 0.85;
+}
+
+.project-tech .book-status {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.book-note {
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════
    CONTACT
    ═══════════════════════════════════════════════ */
 #contact {
@@ -947,6 +1019,7 @@ section {
     padding: 80px 1.2rem 50px;
   }
   #about,
+  #book,
   #contact {
     padding: 80px 1.2rem 50px;
   }
