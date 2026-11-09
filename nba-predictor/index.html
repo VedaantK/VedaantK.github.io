@@ -385,8 +385,8 @@
   function renderSources(list) {
     var host = $("sources");
     if (!list || !list.length) { host.innerHTML = '<div class="empty">—</div>'; return; }
-    var cls = { "live": "live", "awaiting season": "pending", "awaiting fix": "broken", "empty": "broken" };
-    var label = { "live": "LIVE", "awaiting season": "OFF-SEASON", "awaiting fix": "NO DATA", "empty": "EMPTY" };
+    var cls = { "live": "live", "awaiting season": "pending", "paused": "pending", "awaiting fix": "broken", "empty": "broken" };
+    var label = { "live": "LIVE", "awaiting season": "OFF-SEASON", "paused": "PAUSED", "awaiting fix": "NO DATA", "empty": "EMPTY" };
     host.innerHTML = list.map(function (s) {
       var k = cls[s.status] || "broken";
       return '<div class="src ' + k + '"><div>' +
