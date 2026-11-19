@@ -107,7 +107,7 @@
           <div class="card-label">// PLAYER ONE</div>
           <p class="about-text">
             Hi, I'm Vedaant, a freshman at Carnegie Mellon University studying Statistics &amp; Machine Learning.
-            I'm interested in business analytics and researching the stock market.
+            I'm interested in how markets price information, and I build tools to test investment ideas properly before I trust them.
           </p>
 
           <!-- Skills section — required by course spec -->
@@ -149,8 +149,53 @@
       <span class="scroll-hint-inline">◀ SCROLL ▶</span>
     </div>
 
-    <!-- Newest project first (left) — cards scroll horizontally, oldest ends up on the right -->
+    <!-- Markets projects first, then newest to oldest — cards scroll horizontally, oldest ends up on the right -->
     <div class="projects-grid">
+
+      <!-- Research desk: every systematic strategy tested, published whether it worked or not -->
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-yellow"></div><div class="pb b-yellow"></div><div class="pb b-yellow"></div>
+          </div>
+          <span class="project-tag">MARKETS</span>
+        </div>
+        <h3 class="project-name">RESEARCH DESK</h3>
+        <p class="project-desc">
+          Every S&amp;P 500 strategy I've tested, published with the same detail whether it
+          worked or not. Most didn't. Rules and pass/fail gates are fixed before the first run,
+          and a strategy gets a single sealed out-of-sample test.
+        </p>
+        <div class="project-tech">
+          <span>Python</span><span>CRSP</span><span>Compustat</span><span>Backtesting</span>
+        </div>
+        <div class="project-links">
+          <a href="https://vedaantk.github.io/research-desk/" class="btn-sm" target="_blank" rel="noopener">[ VIEW ]</a>
+          <a href="https://github.com/VedaantK/research-desk" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
+        </div>
+      </article>
+
+      <!-- Horizon: multi-engine backtester -->
+      <article class="project-card pixel-border">
+        <div class="project-top">
+          <div class="project-bricks" aria-hidden="true">
+            <div class="pb b-orange"></div><div class="pb b-orange"></div><div class="pb b-orange"></div>
+          </div>
+          <span class="project-tag">MARKETS</span>
+        </div>
+        <h3 class="project-name">HORIZON</h3>
+        <p class="project-desc">
+          A backtester that accepts a result only when three independent engines agree on every
+          fill and every dollar. Built to catch the mistakes that create fake returns:
+          look-ahead, survivorship bias, missing costs and testing too many ideas.
+        </p>
+        <div class="project-tech">
+          <span>Python</span><span>vectorbt</span><span>Nautilus Trader</span><span>pandas</span>
+        </div>
+        <div class="project-links">
+          <a href="https://github.com/VedaantK/horizon" class="btn-sm" target="_blank" rel="noopener">[ CODE ]</a>
+        </div>
+      </article>
 
       <!-- Movie Finder — semantic search over Netflix titles with ChromaDB (newest project) -->
       <article class="project-card pixel-border">
@@ -190,7 +235,7 @@
           Lichess games. Progress is saved through serverless functions backed by Supabase.
         </p>
         <div class="project-tech">
-          <span>JavaScript</span><span>Vite</span><span>chess.js</span><span>Vercel</span><span>Supabase</span>
+          <span>JavaScript</span><span>Vite</span><span>chess.js</span><span>Render</span><span>Supabase</span>
         </div>
         <div class="project-links">
           <a href="https://opening-trainer-u1ow.onrender.com" class="btn-sm" target="_blank" rel="noopener">[ PLAY ]</a>
